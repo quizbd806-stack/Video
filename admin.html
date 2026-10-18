@@ -21,87 +21,30 @@
   --neon-1: #0891b2; --neon-3: #7c3aed; --gold: #d97706;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body {
-  margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
-  background-attachment: fixed; color: var(--text); min-height: 100vh;
-}
-.glass-card {
-  background: var(--glass-bg); backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border); border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3); padding: 16px; margin-bottom: 12px;
-}
-.glass-header {
-  position: sticky; top: 0; margin: 8px 12px;
-  padding: 12px 16px; display: flex; justify-content: space-between;
-  align-items: center; z-index: 50;
-  background: var(--glass-bg); backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border); border-radius: 16px;
-}
-.glass-btn {
-  background: var(--glass-bg); border: 1px solid var(--glass-border);
-  color: var(--text); padding: 8px 16px; border-radius: 12px;
-  font-weight: 600; cursor: pointer; transition: transform 0.15s; font-size: 0.85rem;
-}
+body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); background-attachment: fixed; color: var(--text); min-height: 100vh; }
+.glass-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); padding: 16px; margin-bottom: 12px; }
+.glass-header { position: sticky; top: 0; margin: 8px 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 50; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 16px; }
+.glass-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text); padding: 8px 16px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: transform 0.15s; font-size: 0.85rem; }
 .glass-btn:active { transform: scale(0.95); }
-.glass-btn.primary {
-  background: linear-gradient(135deg, var(--neon-1), var(--neon-3));
-  border: none; color: white; width: 100%; padding: 12px;
-}
+.glass-btn.primary { background: linear-gradient(135deg, var(--neon-1), var(--neon-3)); border: none; color: white; width: 100%; padding: 12px; }
 .glass-btn.danger { background: linear-gradient(135deg,#ff3b3b,#ff0066); border: none; color: white; }
-.glass-input {
-  width: 100%; padding: 12px; background: var(--glass-bg);
-  border: 1px solid var(--glass-border); border-radius: 12px;
-  color: var(--text); font-size: 0.9rem; margin-bottom: 10px; outline: none;
-}
+.glass-input { width: 100%; padding: 12px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text); font-size: 0.9rem; margin-bottom: 10px; outline: none; }
 .glass-input:focus { border-color: var(--neon-1); }
-.text-3d {
-  font-weight: 900; font-size: 1.8rem; margin: 0;
-  background: linear-gradient(135deg, var(--neon-1), var(--neon-3));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+.text-3d { font-weight: 900; font-size: 1.8rem; margin: 0; background: linear-gradient(135deg, var(--neon-1), var(--neon-3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .text-3d-sm { font-weight: 700; font-size: 0.9rem; }
-.loader-screen {
-  position: fixed; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); z-index: 9999;
-}
-.coin-3d {
-  font-size: 5rem; animation: coin-spin 2s infinite ease-in-out;
-  filter: drop-shadow(0 0 20px var(--gold));
-}
-@keyframes coin-spin {
-  0%, 100% { transform: rotateY(0deg) scale(1); }
-  50% { transform: rotateY(180deg) scale(1.1); }
-}
+.loader-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); z-index: 9999; }
+.coin-3d { font-size: 5rem; animation: coin-spin 2s infinite ease-in-out; filter: drop-shadow(0 0 20px var(--gold)); }
+@keyframes coin-spin { 0%, 100% { transform: rotateY(0deg) scale(1); } 50% { transform: rotateY(180deg) scale(1.1); } }
 .hidden { display: none !important; }
-.admin-tabs {
-  display: flex; gap: 6px; padding: 8px 12px;
-  overflow-x: auto; scrollbar-width: none;
-}
+.admin-tabs { display: flex; gap: 6px; padding: 8px 12px; overflow-x: auto; scrollbar-width: none; }
 .admin-tabs::-webkit-scrollbar { display: none; }
-.tab-btn {
-  padding: 8px 14px; white-space: nowrap;
-  background: var(--glass-bg); border: 1px solid var(--glass-border);
-  border-radius: 20px; color: var(--text-muted); cursor: pointer; font-size: 0.8rem;
-}
-.tab-btn.active {
-  background: linear-gradient(135deg, var(--neon-1), var(--neon-3));
-  color: white; border: none;
-}
+.tab-btn { padding: 8px 14px; white-space: nowrap; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; color: var(--text-muted); cursor: pointer; font-size: 0.8rem; }
+.tab-btn.active { background: linear-gradient(135deg, var(--neon-1), var(--neon-3)); color: white; border: none; }
 .admin-content { padding: 12px; }
-.admin-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.85rem;
-}
+.admin-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.85rem; }
 .admin-row:last-child { border: none; }
-.stat-box {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-}
-.stat-item {
-  background: var(--glass-bg); padding: 14px; border-radius: 12px; text-align: center;
-}
+.stat-box { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.stat-item { background: var(--glass-bg); padding: 14px; border-radius: 12px; text-align: center; }
 .stat-item h4 { margin: 0; font-size: 0.7rem; color: var(--text-muted); }
 .stat-item p { margin: 4px 0 0; font-size: 1.4rem; font-weight: 800; color: var(--neon-1); }
 .section-title { font-size: 1rem; font-weight: 800; margin: 12px 0; }
@@ -112,11 +55,7 @@ body {
 <body>
 
 <div id="adminApp">
-  <div id="loader" class="loader-screen">
-    <div class="coin-3d">⚙️</div>
-    <h1 class="text-3d">Admin Panel</h1>
-    <p>লোড হচ্ছে...</p>
-  </div>
+  <div id="loader" class="loader-screen"><div class="coin-3d">⚙️</div><h1 class="text-3d">Admin Panel</h1><p>লোড হচ্ছে...</p></div>
 
   <div id="adminMain" class="hidden">
     <header class="glass-header">
@@ -127,6 +66,7 @@ body {
     <div class="admin-tabs">
       <button class="tab-btn active" data-tab="dashboard">📊 Stats</button>
       <button class="tab-btn" data-tab="videos">📹 Videos</button>
+      <button class="tab-btn" data-tab="categories">📂 Categories</button>
       <button class="tab-btn" data-tab="pending">⏳ Pending</button>
       <button class="tab-btn" data-tab="users">👥 Users</button>
       <button class="tab-btn" data-tab="withdrawals">💸 Withdrawals</button>
@@ -145,29 +85,18 @@ const cfg = {
   SUPABASE_ANON_KEY: 'sb_publishable_6SU40N9QJZfPxsWYkIepSA_1PBOMvIl',
   ADMIN_TELEGRAM_ID: 7609414654,
 };
-
 const supabase = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
 const tg = window.Telegram?.WebApp;
-
 let currentUser = null;
 let currentTab = 'dashboard';
 
 async function init() {
   if (tg) { tg.ready(); tg.expand(); }
-
-  if (!tg?.initDataUnsafe?.user) {
-    document.getElementById('loader').innerHTML = '<p style="padding:20px;text-align:center">Telegram Bot থেকে খুলুন</p>';
-    return;
-  }
-
+  if (!tg?.initDataUnsafe?.user) { document.getElementById('loader').innerHTML = '<p style="padding:20px;text-align:center">Telegram Bot থেকে খুলুন</p>'; return; }
   const u = tg.initDataUnsafe.user;
   const { data } = await supabase.rpc('get_user_data', { p_telegram_id: u.id });
-  if (!data || !data.is_admin) {
-    document.getElementById('loader').innerHTML = '<p style="padding:20px;text-align:center;color:#ff6b6b">❌ আপনি Admin নন</p>';
-    return;
-  }
+  if (!data || !data.is_admin) { document.getElementById('loader').innerHTML = '<p style="padding:20px;text-align:center;color:#ff6b6b">❌ আপনি Admin নন</p>'; return; }
   currentUser = data;
-
   document.getElementById('loader').classList.add('hidden');
   document.getElementById('adminMain').classList.remove('hidden');
 
@@ -187,6 +116,7 @@ async function renderTab() {
   c.innerHTML = '<p style="text-align:center;padding:20px">Loading...</p>';
   if (currentTab === 'dashboard') await renderDashboard(c);
   else if (currentTab === 'videos') await renderVideos(c);
+  else if (currentTab === 'categories') await renderCategories(c);
   else if (currentTab === 'pending') await renderPending(c);
   else if (currentTab === 'users') await renderUsers(c);
   else if (currentTab === 'withdrawals') await renderWithdrawals(c);
@@ -213,26 +143,73 @@ async function renderDashboard(c) {
     </div>`;
 }
 
+async function renderCategories(c) {
+  const { data: cats } = await supabase.from('video_categories').select('*').order('created_at', { ascending: true });
+  c.innerHTML = `
+    <div class="glass-card">
+      <h3>➕ নতুন ক্যাটাগরি তৈরি করুন</h3>
+      <div class="form-group"><label>ক্যাটাগরির নাম</label><input class="glass-input" id="newCatName" placeholder="যেমন: Funny"></div>
+      <div class="form-group"><label>আইকন (ইমোজি)</label><input class="glass-input" id="newCatIcon" placeholder="যেমন: 😂" maxlength="2"></div>
+      <button class="glass-btn primary" id="addCatBtn">Add Category</button>
+    </div>
+    <h3 class="section-title">📂 সকল ক্যাটাগরি</h3>
+    ${(cats || []).map(cat => `
+      <div class="glass-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px; margin-bottom:8px;">
+        <div style="font-weight:700; font-size:1rem;">${cat.icon || '📁'} ${cat.name}</div>
+        <button class="glass-btn danger" onclick="window.deleteCat('${cat.id}')" style="padding:4px 10px; width:auto;">🗑</button>
+      </div>`).join('')}`;
+
+  document.getElementById('addCatBtn').onclick = async () => {
+    const name = document.getElementById('newCatName').value.trim();
+    const icon = document.getElementById('newCatIcon').value.trim() || '📁';
+    if (!name) return alert('ক্যাটাগরির নাম দিন');
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const { error } = await supabase.from('video_categories').insert({ name, slug, icon, is_active: true });
+    if (error) {
+      if (error.code === '23505') return alert('এই নামের ক্যাটাগরি আগেই আছে!');
+      return alert('Error: ' + error.message);
+    }
+    alert('ক্যাটাগরি তৈরি হয়েছে!');
+    renderCategories(c);
+  };
+  window.deleteCat = async (id) => {
+    if (!confirm('নিশ্চিত? এই ক্যাটাগরির ভিডিওগুলো আন-ক্যাটাগরাইজড হয়ে যাবে।')) return;
+    await supabase.from('video_categories').delete().eq('id', id);
+    renderCategories(c);
+  };
+}
+
 async function renderVideos(c) {
-  const { data: videos } = await supabase.from('videos')
-    .select('*').order('created_at', { ascending: false }).limit(50);
+  const { data: videos } = await supabase.from('videos').select('*').order('created_at', { ascending: false }).limit(50);
   const { data: cats } = await supabase.from('video_categories').select('*').eq('is_active', true);
 
   c.innerHTML = `
     <div class="glass-card">
       <h3>➕ Add YouTube Video</h3>
+      <div class="form-group"><input class="glass-input" id="ytUrl" placeholder="https://youtube.com/watch?v=..."></div>
       <div class="form-group">
-        <label>YouTube URL</label>
-        <input class="glass-input" id="ytUrl" placeholder="https://youtube.com/watch?v=...">
-      </div>
-      <div class="form-group">
-        <label>Category</label>
         <select class="glass-input" id="ytCat">
           ${(cats || []).map(cat => `<option value="${cat.id}">${cat.icon} ${cat.name}</option>`).join('')}
         </select>
       </div>
-      <button class="glass-btn primary" id="addYtBtn">Add Video</button>
+      <button class="glass-btn primary" id="addYtBtn">Add YouTube Video</button>
     </div>
+
+    <div class="glass-card" style="margin-top:12px; border-color:var(--gold)">
+      <h3 style="color:var(--gold)">📱 Upload from Gallery</h3>
+      <div class="form-group"><input class="glass-input" id="upTitle" placeholder="Video Title"></div>
+      <div class="form-group">
+        <select class="glass-input" id="upCat">
+          ${(cats || []).map(cat => `<option value="${cat.id}">${cat.icon} ${cat.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="file" id="upFile" accept="video/mp4,video/webm" style="color:var(--text)">
+      </div>
+      <button class="glass-btn primary" id="upBtn" style="background:var(--gold);color:#000">Upload Video</button>
+      <p id="upProgress" style="text-align:center;font-size:0.8rem;color:var(--text-muted);margin-top:8px;"></p>
+    </div>
+
     <h3 class="section-title">📹 All Videos (${(videos || []).length})</h3>
     ${(videos || []).map(v => `
       <div class="glass-card">
@@ -261,45 +238,49 @@ async function renderVideos(c) {
     let thumb = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
     try {
       const r = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`);
-      const j = await r.json();
-      title = j.title;
+      const j = await r.json(); title = j.title;
     } catch {}
-    const { error } = await supabase.from('videos').insert({
-      title, youtube_id: ytId, source_type: 'youtube',
-      thumbnail_url: thumb, category_id: catId,
-      status: 'approved', published_at: new Date().toISOString(),
-    });
+    const { error } = await supabase.from('videos').insert({ title, youtube_id: ytId, source_type: 'youtube', thumbnail_url: thumb, category_id: catId, status: 'approved', published_at: new Date().toISOString() });
     if (error) return alert('Error: ' + error.message);
-    alert('ভিডিও যোগ হয়েছে!');
-    renderVideos(c);
+    alert('YouTube ভিডিও যোগ হয়েছে!'); renderVideos(c);
   };
 
-  window.approveVid = async (id) => {
-    await supabase.from('videos').update({ status: 'approved', published_at: new Date().toISOString() }).eq('id', id);
-    renderVideos(c);
+  document.getElementById('upBtn').onclick = async () => {
+    const title = document.getElementById('upTitle').value.trim();
+    const catId = document.getElementById('upCat').value;
+    const file = document.getElementById('upFile').files[0];
+    const prog = document.getElementById('upProgress');
+
+    if (!title || !file) return alert('Title এবং File দুটোই দিন');
+    if (file.size > 50 * 1024 * 1024) return alert('ফাইল সাইজ ৫০MB এর কম হতে হবে');
+
+    prog.textContent = 'আপলোড হচ্ছে... (একটু সময় নিতে পারে)';
+    const fileName = `${Date.now()}_${file.name}`;
+    const { error: uploadErr } = await supabase.storage.from('videos').upload(fileName, file);
+
+    if (uploadErr) { prog.textContent = ''; return alert('Upload Error: ' + uploadErr.message); }
+
+    const { data: urlData } = supabase.storage.from('videos').getPublicUrl(fileName);
+    const { error: dbErr } = await supabase.from('videos').insert({ title, source_type: 'upload', video_url: urlData.publicUrl, category_id: catId, status: 'approved', published_at: new Date().toISOString() });
+
+    if (dbErr) { prog.textContent = ''; return alert('DB Error: ' + dbErr.message); }
+
+    prog.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
+    setTimeout(() => prog.textContent = '', 3000); renderVideos(c);
   };
-  window.rejectVid = async (id) => {
-    if (!confirm('Reject?')) return;
-    await supabase.from('videos').update({ status: 'rejected' }).eq('id', id);
-    renderVideos(c);
-  };
-  window.deleteVid = async (id) => {
-    if (!confirm('Delete permanently?')) return;
-    await supabase.from('videos').delete().eq('id', id);
-    renderVideos(c);
-  };
+
+  window.approveVid = async (id) => { await supabase.from('videos').update({ status: 'approved', published_at: new Date().toISOString() }).eq('id', id); renderVideos(c); };
+  window.rejectVid = async (id) => { if (!confirm('Reject?')) return; await supabase.from('videos').update({ status: 'rejected' }).eq('id', id); renderVideos(c); };
+  window.deleteVid = async (id) => { if (!confirm('Delete permanently?')) return; await supabase.from('videos').delete().eq('id', id); renderVideos(c); };
 }
 
 async function renderPending(c) {
-  const { data } = await supabase.from('videos').select('*')
-    .eq('status', 'pending').order('created_at', { ascending: false });
+  const { data } = await supabase.from('videos').select('*').eq('status', 'pending').order('created_at', { ascending: false });
   c.innerHTML = `<h3 class="section-title">⏳ Pending (${(data || []).length})</h3>
     ${(data || []).length ? data.map(v => `
       <div class="glass-card">
         <div style="font-weight:700">${esc(v.title)}</div>
-        <div style="font-size:0.75rem;color:var(--text-muted);margin:6px 0">
-          ${v.source_type} | ${new Date(v.created_at).toLocaleString('bn')}
-        </div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin:6px 0">${v.source_type} | ${new Date(v.created_at).toLocaleString('bn')}</div>
         ${v.video_url ? `<video src="${v.video_url}" controls style="width:100%;border-radius:8px;margin:8px 0"></video>` : ''}
         <div style="display:flex;gap:6px;margin-top:8px">
           <button class="glass-btn" onclick="window.approveVid('${v.id}')" style="flex:1">✅ Approve</button>
@@ -308,14 +289,8 @@ async function renderPending(c) {
       </div>
     `).join('') : '<p style="text-align:center;color:var(--text-muted);padding:20px">কোনো pending ভিডিও নেই</p>'}`;
 
-  window.approveVid = async (id) => {
-    await supabase.from('videos').update({ status: 'approved', published_at: new Date().toISOString() }).eq('id', id);
-    renderPending(c);
-  };
-  window.rejectVid = async (id) => {
-    await supabase.from('videos').update({ status: 'rejected' }).eq('id', id);
-    renderPending(c);
-  };
+  window.approveVid = async (id) => { await supabase.from('videos').update({ status: 'approved', published_at: new Date().toISOString() }).eq('id', id); renderPending(c); };
+  window.rejectVid = async (id) => { await supabase.from('videos').update({ status: 'rejected' }).eq('id', id); renderPending(c); };
 }
 
 async function renderUsers(c) {
@@ -337,9 +312,7 @@ async function renderUsers(c) {
           </div>
           <div style="display:flex;gap:6px;margin-top:8px">
             <button class="glass-btn" onclick="window.adjustCoins(${u.telegram_id})">🪙 Adjust</button>
-            ${u.is_banned
-              ? `<button class="glass-btn" onclick="window.unbanUser(${u.telegram_id})" style="background:#4ade80;color:#000">✅ Unban</button>`
-              : `<button class="glass-btn danger" onclick="window.banUser(${u.telegram_id})">🚫 Ban</button>`}
+            ${u.is_banned ? `<button class="glass-btn" onclick="window.unbanUser(${u.telegram_id})" style="background:#4ade80;color:#000">✅ Unban</button>` : `<button class="glass-btn danger" onclick="window.banUser(${u.telegram_id})">🚫 Ban</button>`}
           </div>
         </div>`;
     }).join('')}`;
@@ -348,38 +321,23 @@ async function renderUsers(c) {
     const amt = parseInt(prompt('কয়েন পরিমাণ (+ যোগ / - বিয়োগ):'));
     if (!amt) return;
     const reason = prompt('কারণ:') || 'Admin adjustment';
-    const { error } = await supabase.rpc('admin_adjust_coins', {
-      p_admin_tg: tg.initDataUnsafe.user.id, p_target_tg: tgId,
-      p_amount: amt, p_reason: reason,
-    });
+    const { error } = await supabase.rpc('admin_adjust_coins', { p_admin_tg: tg.initDataUnsafe.user.id, p_target_tg: tgId, p_amount: amt, p_reason: reason });
     if (error) return alert('Error: ' + error.message);
-    alert('সফল!');
-    renderUsers(c);
+    alert('সফল!'); renderUsers(c);
   };
-  window.banUser = async (tgId) => {
-    if (!confirm('Ban?')) return;
-    await supabase.from('users').update({ is_banned: true }).eq('telegram_id', tgId);
-    renderUsers(c);
-  };
-  window.unbanUser = async (tgId) => {
-    await supabase.from('users').update({ is_banned: false }).eq('telegram_id', tgId);
-    renderUsers(c);
-  };
+  window.banUser = async (tgId) => { if (!confirm('Ban?')) return; await supabase.from('users').update({ is_banned: true }).eq('telegram_id', tgId); renderUsers(c); };
+  window.unbanUser = async (tgId) => { await supabase.from('users').update({ is_banned: false }).eq('telegram_id', tgId); renderUsers(c); };
 }
 
 async function renderWithdrawals(c) {
-  const { data } = await supabase.from('withdrawals')
-    .select('*, users(first_name, telegram_id)')
-    .order('created_at', { ascending: false }).limit(50);
+  const { data } = await supabase.from('withdrawals').select('*, users(first_name, telegram_id)').order('created_at', { ascending: false }).limit(50);
   c.innerHTML = `<h3 class="section-title">💸 Withdrawals</h3>
     ${(data || []).length ? data.map(w => `
       <div class="glass-card">
         <div style="display:flex;justify-content:space-between;margin-bottom:6px">
           <div>
             <div style="font-weight:700">🪙 ${w.coins_amount} = ৳${w.bdt_amount}</div>
-            <div style="font-size:0.75rem;color:var(--text-muted)">
-              ${esc(w.users?.first_name || 'User')} | ${w.payment_method}: ${w.payment_number}
-            </div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">${esc(w.users?.first_name || 'User')} | ${w.payment_method}: ${w.payment_number}</div>
           </div>
           <span style="color:${w.status === 'completed' ? '#4ade80' : w.status === 'rejected' ? '#ff6b6b' : '#ffa500'};font-weight:700">${w.status}</span>
         </div>
@@ -391,17 +349,10 @@ async function renderWithdrawals(c) {
       </div>
     `).join('') : '<p style="text-align:center;color:var(--text-muted);padding:20px">কোনো উইথড্রয়াল নেই</p>'}`;
 
-  window.completeWd = async (id) => {
-    await supabase.from('withdrawals').update({ status: 'completed', processed_at: new Date().toISOString() }).eq('id', id);
-    renderWithdrawals(c);
-  };
+  window.completeWd = async (id) => { await supabase.from('withdrawals').update({ status: 'completed', processed_at: new Date().toISOString() }).eq('id', id); renderWithdrawals(c); };
   window.rejectWd = async (id, coins, tgId) => {
     await supabase.from('withdrawals').update({ status: 'rejected', processed_at: new Date().toISOString() }).eq('id', id);
-    await supabase.rpc('admin_adjust_coins', {
-      p_admin_tg: tg.initDataUnsafe.user.id,
-      p_target_tg: parseInt(tgId),
-      p_amount: coins, p_reason: 'Withdrawal rejected - refund',
-    });
+    await supabase.rpc('admin_adjust_coins', { p_admin_tg: tg.initDataUnsafe.user.id, p_target_tg: parseInt(tgId), p_amount: coins, p_reason: 'Withdrawal rejected - refund' });
     renderWithdrawals(c);
   };
 }
@@ -412,34 +363,18 @@ async function renderSettings(c) {
     <div class="glass-card">
       <h3>🪙 Reward Settings</h3>
       ${[
-        ['welcome_bonus_coins', 'Welcome Bonus Coins'],
-        ['video_watch_coins', 'Video Watch Reward'],
-        ['video_watch_min_seconds', 'Min Watch Seconds'],
-        ['like_coins', 'Like Reward'],
-        ['comment_coins', 'Comment Reward'],
-        ['share_coins', 'Share Reward'],
-        ['referral_coins', 'Referral Reward'],
-        ['daily_earning_limit', 'Daily Earning Limit'],
-        ['coin_to_bdt_rate', 'Coin to BDT Rate'],
-        ['min_withdrawal_coins', 'Min Withdrawal Coins'],
+        ['welcome_bonus_coins', 'Welcome Bonus Coins'], ['video_watch_coins', 'Video Watch Reward'], ['video_watch_min_seconds', 'Min Watch Seconds'],
+        ['like_coins', 'Like Reward'], ['comment_coins', 'Comment Reward'], ['share_coins', 'Share Reward'], ['referral_coins', 'Referral Reward'],
+        ['daily_earning_limit', 'Daily Earning Limit'], ['coin_to_bdt_rate', 'Coin to BDT Rate'], ['min_withdrawal_coins', 'Min Withdrawal Coins'],
       ].map(([k, label]) => `
-        <div class="form-group">
-          <label>${label}</label>
-          <input class="glass-input" type="number" data-key="${k}" value="${s[k]}">
-        </div>
+        <div class="form-group"><label>${label}</label><input class="glass-input" type="number" data-key="${k}" value="${s[k]}"></div>
       `).join('')}
       ${[
-        ['welcome_bonus_enabled', 'Welcome Bonus'],
-        ['video_watch_enabled', 'Video Watch Reward'],
-        ['like_enabled', 'Like Reward'],
-        ['comment_enabled', 'Comment Reward'],
-        ['share_enabled', 'Share Reward'],
-        ['referral_enabled', 'Referral'],
-        ['withdrawal_enabled', 'Withdrawal'],
+        ['welcome_bonus_enabled', 'Welcome Bonus'], ['video_watch_enabled', 'Video Watch Reward'], ['like_enabled', 'Like Reward'],
+        ['comment_enabled', 'Comment Reward'], ['share_enabled', 'Share Reward'], ['referral_enabled', 'Referral'], ['withdrawal_enabled', 'Withdrawal'],
       ].map(([k, label]) => `
         <div class="form-group" style="display:flex;align-items:center;gap:8px">
-          <input type="checkbox" data-toggle="${k}" ${s[k] ? 'checked' : ''}>
-          <label style="margin:0">${label} চালু</label>
+          <input type="checkbox" data-toggle="${k}" ${s[k] ? 'checked' : ''}><label style="margin:0">${label} চালু</label>
         </div>
       `).join('')}
       <button class="glass-btn primary" id="saveSettings">💾 Save Settings</button>
