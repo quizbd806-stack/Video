@@ -6,7 +6,6 @@
 <title>TurkFlix BD</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-/* ========== THEME VARIABLES ========== */
 :root[data-theme="dark"] {
   --bg-1: #0a0a1a; --bg-2: #1a0a2e;
   --glass-bg: rgba(255,255,255,0.06);
@@ -28,8 +27,6 @@ body {
   background-attachment: fixed; color: var(--text);
   min-height: 100vh; padding-bottom: 90px;
 }
-
-/* ========== GLASS ========== */
 .glass-card, .glass-header, .glass-bottom-nav, .video-card {
   background: var(--glass-bg);
   backdrop-filter: blur(20px) saturate(180%);
@@ -38,8 +35,6 @@ body {
   box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
   position: relative; overflow: hidden;
 }
-
-/* ========== HEADER ========== */
 .glass-header {
   position: sticky; top: 8px; margin: 8px 12px;
   padding: 12px 16px; display: flex; justify-content: space-between;
@@ -52,8 +47,6 @@ body {
   color: #000; padding: 2px 8px; border-radius: 10px;
   font-size: 0.75rem; font-weight: 700; display: inline-block;
 }
-
-/* ========== 3D TEXT ========== */
 .text-3d {
   font-weight: 900; font-size: 1.8rem; margin: 0;
   background: linear-gradient(135deg, var(--neon-1), var(--neon-2), var(--neon-3));
@@ -62,8 +55,6 @@ body {
   text-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 20px var(--neon-3);
 }
 .text-3d-sm { font-weight: 700; font-size: 0.9rem; }
-
-/* ========== BUTTON ========== */
 .glass-btn {
   background: var(--glass-bg); border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px); color: var(--text);
@@ -76,9 +67,6 @@ body {
   border: none; color: white; width: 100%; padding: 12px;
   box-shadow: 0 4px 20px rgba(168,85,247,0.4);
 }
-.glass-btn.danger { background: linear-gradient(135deg,#ff3b3b,#ff0066); border: none; color: white; }
-
-/* ========== INPUT ========== */
 .glass-input {
   width: 100%; padding: 12px;
   background: var(--glass-bg); border: 1px solid var(--glass-border);
@@ -86,121 +74,45 @@ body {
   margin-bottom: 10px; outline: none;
 }
 .glass-input:focus { border-color: var(--neon-1); }
-
-/* ========== VIDEO CARD ========== */
 .page-content { padding: 12px; }
 .video-card { margin-bottom: 16px; padding: 0; cursor: pointer; transition: transform 0.15s; }
 .video-card:active { transform: scale(0.98); }
-.video-thumb {
-  width: 100%; aspect-ratio: 16/9; object-fit: cover;
-  border-radius: 20px 20px 0 0; display: block; background: #000;
-}
+.video-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 20px 20px 0 0; display: block; background: #000; }
 .video-info { padding: 10px 12px; }
 .video-title { font-weight: 700; margin: 0 0 6px; font-size: 0.95rem; line-height: 1.3; }
 .video-meta { display: flex; gap: 12px; font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap; }
-.reward-badge {
-  background: linear-gradient(135deg, var(--gold), #ff9500);
-  color: #000; padding: 2px 8px; border-radius: 8px;
-  font-size: 0.7rem; font-weight: 700;
-}
-
-/* ========== BOTTOM NAV ========== */
-.glass-bottom-nav {
-  position: fixed; bottom: 12px; left: 12px; right: 12px;
-  display: flex; justify-content: space-around;
-  padding: 8px; border-radius: 24px; z-index: 100;
-}
-.nav-btn {
-  background: none; border: none; color: var(--text-muted);
-  padding: 8px 10px; border-radius: 16px;
-  display: flex; flex-direction: column; align-items: center;
-  font-size: 0.7rem; gap: 2px; cursor: pointer;
-  transition: all 0.2s; flex: 1;
-}
-.nav-btn.active {
-  color: var(--neon-1); background: rgba(0,229,255,0.1);
-  text-shadow: 0 0 10px var(--neon-1);
-}
-
-/* ========== LOADER ========== */
-.loader-screen {
-  position: fixed; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
-  z-index: 9999;
-}
-.coin-3d {
-  font-size: 5rem; animation: coin-spin 2s infinite ease-in-out;
-  filter: drop-shadow(0 0 20px var(--gold));
-}
-@keyframes coin-spin {
-  0%, 100% { transform: rotateY(0deg) scale(1); }
-  50% { transform: rotateY(180deg) scale(1.1); }
-}
-
-/* ========== POPUP ========== */
-.coin-reward-popup {
-  position: fixed; inset: 0; display: flex; align-items: center;
-  justify-content: center; background: rgba(0,0,0,0.75);
-  z-index: 1000; animation: fadeIn 0.3s;
-}
-.coin-reward-popup .content {
-  background: var(--glass-bg); backdrop-filter: blur(30px);
-  border: 2px solid var(--gold); border-radius: 24px; padding: 40px;
-  text-align: center;
-  animation: popIn 0.5s cubic-bezier(0.68,-0.55,0.27,1.55);
-}
-@keyframes popIn {
-  0% { transform: scale(0) rotate(-180deg); }
-  100% { transform: scale(1) rotate(0deg); }
-}
+.reward-badge { background: linear-gradient(135deg, var(--gold), #ff9500); color: #000; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; }
+.glass-bottom-nav { position: fixed; bottom: 12px; left: 12px; right: 12px; display: flex; justify-content: space-around; padding: 8px; border-radius: 24px; z-index: 100; }
+.nav-btn { background: none; border: none; color: var(--text-muted); padding: 8px 10px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; gap: 2px; cursor: pointer; transition: all 0.2s; flex: 1; }
+.nav-btn.active { color: var(--neon-1); background: rgba(0,229,255,0.1); text-shadow: 0 0 10px var(--neon-1); }
+.loader-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); z-index: 9999; }
+.coin-3d { font-size: 5rem; animation: coin-spin 2s infinite ease-in-out; filter: drop-shadow(0 0 20px var(--gold)); }
+@keyframes coin-spin { 0%, 100% { transform: rotateY(0deg) scale(1); } 50% { transform: rotateY(180deg) scale(1.1); } }
+.coin-reward-popup { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.75); z-index: 1000; animation: fadeIn 0.3s; }
+.coin-reward-popup .content { background: var(--glass-bg); backdrop-filter: blur(30px); border: 2px solid var(--gold); border-radius: 24px; padding: 40px; text-align: center; animation: popIn 0.5s cubic-bezier(0.68,-0.55,0.27,1.55); }
+@keyframes popIn { 0% { transform: scale(0) rotate(-180deg); } 100% { transform: scale(1) rotate(0deg); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .hidden { display: none !important; }
-
-/* ========== STAT ========== */
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
 .stat-card { padding: 14px; text-align: center; }
 .stat-card h4 { margin: 0 0 4px; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
 .stat-card p { margin: 0; font-size: 1.3rem; font-weight: 800; color: var(--neon-1); }
 .section-title { font-size: 1.1rem; font-weight: 800; margin: 20px 0 12px; display: flex; align-items: center; gap: 6px; }
-
-/* ========== PLAYER ========== */
-.video-player-overlay {
-  position: fixed; inset: 0; z-index: 500;
-  background: var(--bg-1); display: flex; flex-direction: column;
-  overflow-y: auto;
-}
-.player-header {
-  position: sticky; top: 0; padding: 12px;
-  background: var(--glass-bg); backdrop-filter: blur(20px);
-  display: flex; align-items: center; gap: 10px; z-index: 10;
-  border-bottom: 1px solid var(--glass-border);
-}
-.player-iframe-wrap { width: 100%; aspect-ratio: 16/9; background: #000; }
+.video-player-overlay { position: fixed; inset: 0; z-index: 500; background: var(--bg-1); display: flex; flex-direction: column; overflow-y: auto; }
+.player-header { position: sticky; top: 0; padding: 12px; background: var(--glass-bg); backdrop-filter: blur(20px); display: flex; align-items: center; gap: 10px; z-index: 10; border-bottom: 1px solid var(--glass-border); }
+.player-iframe-wrap { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
 .player-iframe-wrap iframe, .player-iframe-wrap video { width: 100%; height: 100%; border: 0; }
+.download-btn { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
 .player-body { padding: 16px; }
-.progress-bar {
-  width: 100%; height: 6px; background: rgba(255,255,255,0.1);
-  border-radius: 3px; overflow: hidden; margin: 10px 0;
-}
-.progress-fill {
-  height: 100%; background: linear-gradient(90deg, var(--neon-1), var(--neon-3));
-  width: 0%; transition: width 0.3s;
-}
+.progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin: 10px 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--neon-1), var(--neon-3)); width: 0%; transition: width 0.3s; }
 .action-row { display: flex; gap: 10px; margin: 12px 0; }
-.action-btn {
-  flex: 1; padding: 10px; background: var(--glass-bg);
-  border: 1px solid var(--glass-border); border-radius: 12px;
-  color: var(--text); cursor: pointer; font-size: 0.85rem;
-}
+.action-btn { flex: 1; padding: 10px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text); cursor: pointer; font-size: 0.85rem; }
 .action-btn.liked { background: linear-gradient(135deg, #ff3366, #ff0066); color: white; }
 .comment-input-row { display: flex; gap: 8px; margin-top: 12px; }
 .comment-input-row input { flex: 1; margin: 0; }
 .comment-input-row button { width: auto; padding: 12px 20px; }
-.comment-item {
-  padding: 10px; background: var(--glass-bg); border-radius: 12px;
-  margin-bottom: 8px; font-size: 0.85rem;
-}
+.comment-item { padding: 10px; background: var(--glass-bg); border-radius: 12px; margin-bottom: 8px; font-size: 0.85rem; }
 .comment-item .author { font-weight: 700; color: var(--neon-1); font-size: 0.8rem; }
 </style>
 </head>
@@ -248,7 +160,6 @@ body {
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-/* ========== CONFIG ========== */
 const cfg = {
   SUPABASE_URL: 'https://ttqrlrgdehwkoabiamty.supabase.co', 
   SUPABASE_ANON_KEY: 'sb_publishable_6SU40N9QJZfPxsWYkIepSA_1PBOMvIl',
@@ -265,13 +176,11 @@ const tg = window.Telegram?.WebApp;
 let currentUser = null;
 let currentSettings = null;
 
-/* ========== INIT ========== */
 async function init() {
   if (tg) {
     tg.ready(); tg.expand();
     try { tg.setHeaderColor('#0a0a1a'); } catch(e){}
   }
-
   const savedTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
   document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
@@ -302,23 +211,16 @@ function toggleTheme() {
   document.getElementById('themeToggle').textContent = next === 'dark' ? '🌙' : '☀️';
 }
 
-/* ========== AUTH ========== */
 async function authenticateUser() {
-  if (!tg || !tg.initDataUnsafe?.user) {
-    throw new Error('Telegram ছাড়া অ্যাক্সেস করা যাবে না। Bot থেকে খুলুন।');
-  }
+  if (!tg || !tg.initDataUnsafe?.user) throw new Error('Telegram ছাড়া অ্যাক্সেস করা যাবে না। Bot থেকে খুলুন।');
   const u = tg.initDataUnsafe.user;
   const startParam = tg.initDataUnsafe.start_param || '';
   const refCode = startParam.startsWith('ref_') ? startParam.slice(4) : null;
 
   const { data, error } = await supabase.rpc('auth_telegram_user', {
-    p_telegram_id: u.id,
-    p_username: u.username || null,
-    p_first_name: u.first_name || null,
-    p_last_name: u.last_name || null,
-    p_photo_url: u.photo_url || null,
-    p_language_code: u.language_code || 'en',
-    p_ref_code: refCode,
+    p_telegram_id: u.id, p_username: u.username || null, p_first_name: u.first_name || null,
+    p_last_name: u.last_name || null, p_photo_url: u.photo_url || null,
+    p_language_code: u.language_code || 'en', p_ref_code: refCode,
   });
   if (error) throw new Error('Auth failed: ' + error.message);
   if (data.is_banned) throw new Error('আপনার অ্যাকাউন্ট ব্যান করা হয়েছে');
@@ -340,7 +242,6 @@ async function loadSettings() {
   currentSettings = data;
 }
 
-/* ========== NAV ========== */
 function setupNav() {
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.onclick = () => {
@@ -356,14 +257,10 @@ function setupNav() {
   });
 }
 
-/* ========== HOME ========== */
 async function renderHome() {
   const c = document.getElementById('pageContent');
   c.innerHTML = '<p style="text-align:center;padding:20px">Loading...</p>';
-
-  const { data: videos } = await supabase
-    .from('videos').select('*').eq('status', 'approved')
-    .order('published_at', { ascending: false }).limit(20);
+  const { data: videos } = await supabase.from('videos').select('*').eq('status', 'approved').order('published_at', { ascending: false }).limit(20);
 
   let html = `
     <div class="glass-card stat-grid" style="padding:12px">
@@ -374,11 +271,8 @@ async function renderHome() {
     </div>
     <h3 class="section-title">🔥 Videos</h3>`;
 
-  if (!videos || !videos.length) {
-    html += '<p style="text-align:center;padding:20px;color:var(--text-muted)">এখনো কোনো ভিডিও নেই। Admin Panel থেকে যোগ করুন।</p>';
-  } else {
-    html += videos.map(v => videoCardHTML(v)).join('');
-  }
+  if (!videos || !videos.length) html += '<p style="text-align:center;padding:20px;color:var(--text-muted)">এখনো কোনো ভিডিও নেই। Admin Panel থেকে যোগ করুন।</p>';
+  else html += videos.map(v => videoCardHTML(v)).join('');
   c.innerHTML = html;
   attachVideoCardEvents();
 }
@@ -390,9 +284,7 @@ function videoCardHTML(v) {
     <div class="video-info">
       <p class="video-title">${esc(v.title)}</p>
       <div class="video-meta">
-        <span>👁 ${v.view_count}</span>
-        <span>❤ ${v.like_count}</span>
-        <span>💬 ${v.comment_count}</span>
+        <span>👁 ${v.view_count}</span><span>❤ ${v.like_count}</span><span>💬 ${v.comment_count}</span>
         <span class="reward-badge">🪙 +${v.reward_coins || currentSettings.video_watch_coins}</span>
       </div>
     </div>
@@ -400,12 +292,9 @@ function videoCardHTML(v) {
 }
 
 function attachVideoCardEvents() {
-  document.querySelectorAll('.video-card').forEach(card => {
-    card.onclick = () => openPlayer(card.dataset.videoId);
-  });
+  document.querySelectorAll('.video-card').forEach(card => { card.onclick = () => openPlayer(card.dataset.videoId); });
 }
 
-/* ========== PLAYER ========== */
 async function openPlayer(videoId) {
   const { data: v } = await supabase.from('videos').select('*').eq('id', videoId).single();
   if (!v) return alert('Video not found');
@@ -418,9 +307,15 @@ async function openPlayer(videoId) {
   const overlay = document.createElement('div');
   overlay.className = 'video-player-overlay';
 
-  const embedHtml = v.source_type === 'youtube'
-    ? `<iframe src="https://www.youtube.com/embed/${v.youtube_id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
-    : `<video src="${v.video_url}" controls autoplay playsinline></video>`;
+  let embedHtml = '';
+  if (v.source_type === 'youtube') {
+    embedHtml = `<iframe src="https://www.youtube.com/embed/${v.youtube_id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  } else {
+    embedHtml = `
+      <video src="${v.video_url}" controls autoplay playsinline></video>
+      <a href="${v.video_url}" download="${v.title}.mp4" target="_blank" class="download-btn">⬇️ Download</a>
+    `;
+  }
 
   overlay.innerHTML = `
     <div class="player-header">
@@ -444,13 +339,8 @@ async function openPlayer(videoId) {
     </div>`;
   document.body.appendChild(overlay);
 
-  // Register view
-  await supabase.from('video_views').insert({
-    video_id: v.id, user_id: currentUser.id,
-    session_id: sessionId, watched_seconds: 0,
-  });
+  await supabase.from('video_views').insert({ video_id: v.id, user_id: currentUser.id, session_id: sessionId, watched_seconds: 0 });
 
-  // Tracker
   const tracker = setInterval(async () => {
     if (!document.body.contains(overlay)) { clearInterval(tracker); return; }
     const elapsed = Math.floor((Date.now() - watchStart) / 1000);
@@ -461,13 +351,8 @@ async function openPlayer(videoId) {
 
     if (maxWatched >= currentSettings.video_watch_min_seconds && !rewardGranted) {
       rewardGranted = true;
-      await supabase.from('video_views')
-        .update({ watched_seconds: maxWatched })
-        .eq('session_id', sessionId);
-      const { data, error } = await supabase.rpc('reward_video_watch', {
-        p_telegram_id: tg.initDataUnsafe.user.id,
-        p_video_id: v.id, p_session_id: sessionId,
-      });
+      await supabase.from('video_views').update({ watched_seconds: maxWatched }).eq('session_id', sessionId);
+      const { data, error } = await supabase.rpc('reward_video_watch', { p_telegram_id: tg.initDataUnsafe.user.id, p_video_id: v.id, p_session_id: sessionId });
       if (!error && data) {
         showCoinPopup(currentSettings.video_watch_coins);
         await refreshUser();
@@ -477,16 +362,11 @@ async function openPlayer(videoId) {
     }
   }, 2000);
 
-  // Like
   document.getElementById('likeBtn').onclick = async (e) => {
-    const { error } = await supabase.from('video_likes').insert({
-      video_id: v.id, user_id: currentUser.id,
-    });
+    const { error } = await supabase.from('video_likes').insert({ video_id: v.id, user_id: currentUser.id });
     if (error && error.code === '23505') return alert('আগেই লাইক দিয়েছেন');
     if (error) return alert('Error: ' + error.message);
-    const { data, error: rErr } = await supabase.rpc('reward_like', {
-      p_telegram_id: tg.initDataUnsafe.user.id, p_video_id: v.id,
-    });
+    const { data, error: rErr } = await supabase.rpc('reward_like', { p_telegram_id: tg.initDataUnsafe.user.id, p_video_id: v.id });
     if (!rErr && data) {
       showCoinPopup(currentSettings.like_coins);
       await refreshUser();
@@ -495,7 +375,6 @@ async function openPlayer(videoId) {
     }
   };
 
-  // Share
   document.getElementById('shareBtn').onclick = async () => {
     const link = `https://t.me/${cfg.BOT_USERNAME}?startapp=video_${v.id}`;
     const text = `🎬 ${v.title}\n\n${link}`;
@@ -504,23 +383,15 @@ async function openPlayer(videoId) {
     await supabase.from('video_shares').insert({ video_id: v.id, user_id: currentUser.id });
   };
 
-  // Comment
   document.getElementById('commentBtn').onclick = async () => {
     const input = document.getElementById('commentInput');
     const content = input.value.trim();
     if (content.length < currentSettings.comment_min_length) return alert(`কমপক্ষে ${currentSettings.comment_min_length} অক্ষর`);
-    const { data: newComment, error } = await supabase.from('video_comments').insert({
-      video_id: v.id, user_id: currentUser.id, content,
-    }).select().single();
+    const { data: newComment, error } = await supabase.from('video_comments').insert({ video_id: v.id, user_id: currentUser.id, content }).select().single();
     if (error) return alert('Error: ' + error.message);
     input.value = '';
-    const { data, error: rErr } = await supabase.rpc('reward_comment', {
-      p_telegram_id: tg.initDataUnsafe.user.id, p_comment_id: newComment.id,
-    });
-    if (!rErr && data) {
-      showCoinPopup(currentSettings.comment_coins);
-      await refreshUser();
-    }
+    const { data, error: rErr } = await supabase.rpc('reward_comment', { p_telegram_id: tg.initDataUnsafe.user.id, p_comment_id: newComment.id });
+    if (!rErr && data) { showCoinPopup(currentSettings.comment_coins); await refreshUser(); }
     loadComments(v.id);
   };
 
@@ -528,23 +399,13 @@ async function openPlayer(videoId) {
 }
 
 async function loadComments(videoId) {
-  const { data } = await supabase.from('video_comments')
-    .select('*, users(first_name)')
-    .eq('video_id', videoId).eq('is_hidden', false)
-    .order('created_at', { ascending: false }).limit(20);
+  const { data } = await supabase.from('video_comments').select('*, users(first_name)').eq('video_id', videoId).eq('is_hidden', false).order('created_at', { ascending: false }).limit(20);
   const list = document.getElementById('commentsList');
   if (!list) return;
-  if (!data || !data.length) {
-    list.innerHTML = '<p style="color:var(--text-muted);text-align:center">কোনো কমেন্ট নেই</p>';
-    return;
-  }
-  list.innerHTML = data.map(c => `<div class="comment-item">
-    <div class="author">${esc(c.users?.first_name || 'User')}</div>
-    <div>${esc(c.content)}</div>
-  </div>`).join('');
+  if (!data || !data.length) { list.innerHTML = '<p style="color:var(--text-muted);text-align:center">কোনো কমেন্ট নেই</p>'; return; }
+  list.innerHTML = data.map(c => `<div class="comment-item"><div class="author">${esc(c.users?.first_name || 'User')}</div><div>${esc(c.content)}</div></div>`).join('');
 }
 
-/* ========== EXPLORE ========== */
 async function renderExplore() {
   const c = document.getElementById('pageContent');
   const { data: cats } = await supabase.from('video_categories').select('*').eq('is_active', true);
@@ -569,42 +430,26 @@ async function loadExploreVideos(catId) {
   if (catId) q = q.eq('category_id', catId);
   const { data } = await q;
   const div = document.getElementById('exploreVideos');
-  if (!data || !data.length) {
-    div.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted)">কোনো ভিডিও নেই</p>';
-    return;
-  }
+  if (!data || !data.length) { div.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted)">কোনো ভিডিও নেই</p>'; return; }
   div.innerHTML = data.map(v => videoCardHTML(v)).join('');
   attachVideoCardEvents();
 }
 
-/* ========== WALLET ========== */
 async function renderWallet() {
   const c = document.getElementById('pageContent');
-  const { data: txs } = await supabase.from('coin_transactions')
-    .select('*').eq('user_id', currentUser.id)
-    .order('created_at', { ascending: false }).limit(30);
-  const { data: wds } = await supabase.from('withdrawals')
-    .select('*').eq('user_id', currentUser.id)
-    .order('created_at', { ascending: false }).limit(10);
+  const { data: txs } = await supabase.from('coin_transactions').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(30);
+  const { data: wds } = await supabase.from('withdrawals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(10);
 
   c.innerHTML = `
     <div class="glass-card" style="padding:20px;text-align:center">
       <h3 class="text-3d-sm">আমার ব্যালেন্স</h3>
       <p class="text-3d" style="font-size:3rem;margin:8px 0">🪙 ${currentUser.balance}</p>
       <p style="color:var(--text-muted);font-size:0.85rem">= ৳ ${(currentUser.balance / cfg.COIN_TO_BDT).toFixed(2)}</p>
-      <p style="color:var(--text-muted);font-size:0.75rem">সর্বমোট আয়: ${currentUser.total_earned} | আজ: ${currentUser.today_earned}</p>
     </div>
     <h3 class="section-title">💸 Withdraw</h3>
     <div class="glass-card" style="padding:16px">
-      <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px">
-        মিনিমাম: ${cfg.MIN_WITHDRAWAL} কয়েন (৳${(cfg.MIN_WITHDRAWAL / cfg.COIN_TO_BDT).toFixed(2)}) | রেট: 1000 কয়েন = ৳1
-      </p>
       <input class="glass-input" id="wdCoins" type="number" placeholder="কয়েন পরিমাণ" min="${cfg.MIN_WITHDRAWAL}">
-      <select class="glass-input" id="wdMethod">
-        <option value="bkash">bKash</option>
-        <option value="nagad">Nagad</option>
-        <option value="rocket">Rocket</option>
-      </select>
+      <select class="glass-input" id="wdMethod"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option></select>
       <input class="glass-input" id="wdNumber" placeholder="মোবাইল নম্বর (01XXXXXXXXX)">
       <button class="glass-btn primary" id="wdBtn">Withdraw Request</button>
     </div>
@@ -612,25 +457,9 @@ async function renderWallet() {
     <div class="glass-card" style="padding:8px">
       ${(txs || []).length ? txs.map(t => `
         <div style="padding:10px;border-bottom:1px solid var(--glass-border);display:flex;justify-content:space-between;font-size:0.85rem">
-          <div>
-            <div>${esc(t.description || t.type)}</div>
-            <div style="font-size:0.7rem;color:var(--text-muted)">${new Date(t.created_at).toLocaleString('bn')}</div>
-          </div>
+          <div><div>${esc(t.description || t.type)}</div><div style="font-size:0.7rem;color:var(--text-muted)">${new Date(t.created_at).toLocaleString('bn')}</div></div>
           <div style="color:${t.amount > 0 ? '#4ade80' : '#ff6b6b'};font-weight:700">${t.amount > 0 ? '+' : ''}${t.amount}</div>
-        </div>
-      `).join('') : '<p style="text-align:center;padding:20px;color:var(--text-muted)">কোনো লেনদেন নেই</p>'}
-    </div>
-    <h3 class="section-title">💳 Withdrawal History</h3>
-    <div class="glass-card" style="padding:8px">
-      ${(wds || []).length ? wds.map(w => `
-        <div style="padding:10px;border-bottom:1px solid var(--glass-border);font-size:0.85rem">
-          <div style="display:flex;justify-content:space-between">
-            <span>🪙 ${w.coins_amount} → ৳${w.bdt_amount} (${w.payment_method})</span>
-            <span style="font-weight:700;color:${w.status === 'completed' ? '#4ade80' : w.status === 'rejected' ? '#ff6b6b' : '#ffa500'}">${w.status}</span>
-          </div>
-          <div style="font-size:0.7rem;color:var(--text-muted)">${new Date(w.created_at).toLocaleString('bn')}</div>
-        </div>
-      `).join('') : '<p style="text-align:center;padding:20px;color:var(--text-muted)">কোনো উইথড্রয়াল নেই</p>'}
+        </div>`).join('') : '<p style="text-align:center;padding:20px;color:var(--text-muted)">কোনো লেনদেন নেই</p>'}
     </div>`;
 
   document.getElementById('wdBtn').onclick = async () => {
@@ -639,10 +468,7 @@ async function renderWallet() {
     const number = document.getElementById('wdNumber').value.trim();
     if (!coins || coins < cfg.MIN_WITHDRAWAL) return alert(`মিনিমাম ${cfg.MIN_WITHDRAWAL} কয়েন`);
     if (!/^01\d{9}$/.test(number)) return alert('সঠিক মোবাইল নম্বর দিন');
-    const { data, error } = await supabase.rpc('request_withdrawal', {
-      p_telegram_id: tg.initDataUnsafe.user.id,
-      p_coins: coins, p_method: method, p_number: number,
-    });
+    const { data, error } = await supabase.rpc('request_withdrawal', { p_telegram_id: tg.initDataUnsafe.user.id, p_coins: coins, p_method: method, p_number: number });
     if (error) return alert('Error: ' + error.message);
     alert(`সফল! ${coins} কয়েন = ৳${data.bdt}`);
     await refreshUser();
@@ -650,35 +476,19 @@ async function renderWallet() {
   };
 }
 
-/* ========== REFERRAL ========== */
 async function renderReferral() {
   const c = document.getElementById('pageContent');
   const link = `https://t.me/${cfg.BOT_USERNAME}?startapp=ref_${currentUser.referral_code}`;
   c.innerHTML = `
     <div class="glass-card" style="padding:20px;text-align:center">
       <h3 class="text-3d">👥 Refer & Earn</h3>
-      <p style="margin:12px 0;color:var(--text-muted);font-size:0.9rem">
-        বন্ধুকে আমন্ত্রণ জানান, প্রতি সফল রেফারেলে <b style="color:var(--gold)">${currentSettings.referral_coins} কয়েন</b> পান!
-      </p>
+      <p style="margin:12px 0;color:var(--text-muted);font-size:0.9rem">বন্ধুকে আমন্ত্রণ জানান, প্রতি সফল রেফারেলে <b style="color:var(--gold)">${currentSettings.referral_coins} কয়েন</b> পান!</p>
       <div class="glass-input" style="word-break:break-all;font-size:0.75rem;text-align:left">${link}</div>
       <button class="glass-btn primary" id="copyRefBtn" style="margin-top:10px">📋 Copy Link</button>
-      <button class="glass-btn primary" id="shareRefBtn" style="margin-top:8px;background:linear-gradient(135deg,#00c853,#00e676)">📤 Share on Telegram</button>
-    </div>
-    <div class="glass-card stat-grid" style="padding:12px;margin-top:16px">
-      <div class="stat-card"><h4>মোট রেফারেল</h4><p>${currentUser.total_referrals}</p></div>
-      <div class="stat-card"><h4>রেফারেল বোনাস</h4><p>${currentSettings.referral_coins}</p></div>
     </div>`;
-  document.getElementById('copyRefBtn').onclick = () => {
-    navigator.clipboard.writeText(link); alert('লিংক কপি হয়েছে!');
-  };
-  document.getElementById('shareRefBtn').onclick = () => {
-    const text = `🎬 ${cfg.APP_NAME} এ যোগ দিন!\nভিডিও দেখে কয়েন আয় করুন।\n${link}`;
-    if (tg) tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`);
-    else window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`);
-  };
+  document.getElementById('copyRefBtn').onclick = () => { navigator.clipboard.writeText(link); alert('লিংক কপি হয়েছে!'); };
 }
 
-/* ========== PROFILE ========== */
 async function renderProfile() {
   const c = document.getElementById('pageContent');
   const { data: board } = await supabase.rpc('get_leaderboard', { p_period: 'all', p_limit: 10 });
@@ -708,7 +518,6 @@ async function renderProfile() {
     ` : ''}`;
 }
 
-/* ========== UTILS ========== */
 function showCoinPopup(amount) {
   const p = document.getElementById('coinPopup');
   document.getElementById('coinPopupAmount').textContent = '+' + amount;
@@ -716,10 +525,7 @@ function showCoinPopup(amount) {
   setTimeout(() => p.classList.add('hidden'), 1800);
   if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 }
-function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
+function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 init();
 </script>
