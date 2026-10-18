@@ -9,58 +9,82 @@
 :root[data-theme="dark"] { --bg-1: #0a0a1a; --bg-2: #1a0a2e; --glass-bg: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12); --text: #ffffff; --text-muted: #a0a0b0; --neon-1: #00e5ff; --neon-2: #ff00e5; --neon-3: #a855f7; --gold: #ffd700; }
 :root[data-theme="light"] { --bg-1: #f0f4ff; --bg-2: #e0e7ff; --glass-bg: rgba(255,255,255,0.7); --glass-border: rgba(0,0,0,0.08); --text: #1a1a2e; --text-muted: #666; --neon-1: #0891b2; --neon-2: #c026d3; --neon-3: #7c3aed; --gold: #d97706; }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); background-attachment: fixed; color: var(--text); min-height: 100vh; padding-bottom: 90px; }
-.glass-card, .glass-header, .glass-bottom-nav, .video-card { background: var(--glass-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15); position: relative; overflow: hidden; }
+body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); background-attachment: fixed; color: var(--text); min-height: 100vh; padding-bottom: 90px; perspective: 1000px; }
+
+/* 3D Glass Effect */
+.glass-card, .glass-header, .glass-bottom-nav, .video-card, .cat-card { background: var(--glass-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 2px 2px rgba(255,255,255,0.2); position: relative; overflow: hidden; transform-style: preserve-3d; }
 .glass-header { position: sticky; top: 8px; margin: 8px 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 50; }
 .user-info { display: flex; gap: 10px; align-items: center; }
-.avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--neon-1); object-fit: cover; }
-.coin-badge { background: linear-gradient(135deg, var(--gold), #ff9500); color: #000; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
-.text-3d { font-weight: 900; font-size: 1.8rem; margin: 0; background: linear-gradient(135deg, var(--neon-1), var(--neon-2), var(--neon-3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 20px var(--neon-3); }
-.text-3d-sm { font-weight: 700; font-size: 0.9rem; }
-.glass-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(10px); color: var(--text); padding: 8px 16px; border-radius: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s; font-size: 0.85rem; }
-.glass-btn:active { transform: scale(0.95); }
-.glass-btn.primary { background: linear-gradient(135deg, var(--neon-1), var(--neon-3)); border: none; color: white; width: 100%; padding: 12px; box-shadow: 0 4px 20px rgba(168,85,247,0.4); }
-.glass-input { width: 100%; padding: 12px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text); font-size: 0.9rem; margin-bottom: 10px; outline: none; }
-.glass-input:focus { border-color: var(--neon-1); }
+.avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--neon-1); object-fit: cover; box-shadow: 0 0 15px var(--neon-1); }
+.coin-badge { background: linear-gradient(135deg, var(--gold), #ff9500); color: #000; padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; display: inline-block; box-shadow: 0 4px 10px rgba(255,215,0,0.3); }
+
+/* 3D Text Floating */
+.text-3d { font-weight: 900; font-size: 1.8rem; margin: 0; background: linear-gradient(135deg, var(--neon-1), var(--neon-2), var(--neon-3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 5px 15px rgba(0,0,0,0.5), 0 0 30px var(--neon-3); transform: translateZ(20px); animation: floatText 3s ease-in-out infinite; }
+@keyframes floatText { 0%, 100% { transform: translateZ(20px) translateY(0); } 50% { transform: translateZ(30px) translateY(-5px); } }
+.text-3d-sm { font-weight: 700; font-size: 0.9rem; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+
+.glass-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(10px); color: var(--text); padding: 8px 16px; border-radius: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+.glass-btn:active { transform: scale(0.95) translateZ(-10px); }
+.glass-btn.primary { background: linear-gradient(135deg, var(--neon-1), var(--neon-3)); border: none; color: white; width: 100%; padding: 12px; box-shadow: 0 6px 20px rgba(168,85,247,0.5); }
+.glass-input { width: 100%; padding: 12px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text); font-size: 0.9rem; margin-bottom: 10px; outline: none; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); }
+
 .page-content { padding: 12px; }
+.section-title { font-size: 1.1rem; font-weight: 900; margin: 20px 0 12px; display: flex; align-items: center; gap: 6px; text-shadow: 0 2px 10px rgba(255,255,255,0.3); }
+
+/* Category Horizontal Box */
+.cat-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 15px 0; scrollbar-width: none; }
+.cat-scroll::-webkit-scrollbar { display: none; }
+.cat-card { min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: transform 0.3s; background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(0,0,0,0.1)); }
+.cat-card:active { transform: scale(0.95); }
+.cat-icon { font-size: 2rem; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); }
+.cat-name { font-size: 0.8rem; font-weight: 700; color: var(--text); }
+
+/* Video Card */
 .video-card { margin-bottom: 16px; padding: 0; cursor: pointer; transition: transform 0.15s; }
 .video-card:active { transform: scale(0.98); }
 .video-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 20px 20px 0 0; display: block; background: #000; }
-.video-info { padding: 10px 12px; }
-.video-title { font-weight: 700; margin: 0 0 6px; font-size: 0.95rem; line-height: 1.3; }
-.video-meta { display: flex; gap: 12px; font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap; }
-.reward-badge { background: linear-gradient(135deg, var(--gold), #ff9500); color: #000; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; }
+.video-info { padding: 12px; }
+.video-title { font-weight: 700; margin: 0 0 8px; font-size: 0.95rem; line-height: 1.3; }
+.video-meta { display: flex; gap: 12px; font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap; align-items: center; }
+.reward-badge { background: linear-gradient(135deg, var(--gold), #ff9500); color: #000; padding: 3px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; box-shadow: 0 2px 8px rgba(255,215,0,0.4); }
+
+/* Bottom Nav */
 .glass-bottom-nav { position: fixed; bottom: 12px; left: 12px; right: 12px; display: flex; justify-content: space-around; padding: 8px; border-radius: 24px; z-index: 100; }
 .nav-btn { background: none; border: none; color: var(--text-muted); padding: 8px 10px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; gap: 2px; cursor: pointer; transition: all 0.2s; flex: 1; }
 .nav-btn.active { color: var(--neon-1); background: rgba(0,229,255,0.1); text-shadow: 0 0 10px var(--neon-1); }
+
+/* Stats Grid */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card { padding: 15px; text-align: center; background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2)); border-radius: 16px; border: 1px solid var(--glass-border); box-shadow: inset 0 1px 1px rgba(255,255,255,0.1); }
+.stat-card h4 { margin: 0 0 6px; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+.stat-card p { margin: 0; font-size: 1.4rem; font-weight: 900; color: var(--neon-1); text-shadow: 0 0 15px rgba(0,229,255,0.5); }
+
+/* Loader & Popup */
 .loader-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); z-index: 9999; }
-.coin-3d { font-size: 5rem; animation: coin-spin 2s infinite ease-in-out; filter: drop-shadow(0 0 20px var(--gold)); }
+.coin-3d { font-size: 5rem; animation: coin-spin 2s infinite ease-in-out; filter: drop-shadow(0 0 30px var(--gold)); }
 @keyframes coin-spin { 0%, 100% { transform: rotateY(0deg) scale(1); } 50% { transform: rotateY(180deg) scale(1.1); } }
-.coin-reward-popup { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.75); z-index: 1000; animation: fadeIn 0.3s; }
-.coin-reward-popup .content { background: var(--glass-bg); backdrop-filter: blur(30px); border: 2px solid var(--gold); border-radius: 24px; padding: 40px; text-align: center; animation: popIn 0.5s cubic-bezier(0.68,-0.55,0.27,1.55); }
-@keyframes popIn { 0% { transform: scale(0) rotate(-180deg); } 100% { transform: scale(1) rotate(0deg); } }
+.coin-reward-popup { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 1000; animation: fadeIn 0.3s; backdrop-filter: blur(5px); }
+.coin-reward-popup .content { background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(0,0,0,0.3)); border: 2px solid var(--gold); border-radius: 24px; padding: 40px; text-align: center; box-shadow: 0 0 50px var(--gold); animation: popIn 0.5s cubic-bezier(0.68,-0.55,0.27,1.55); }
+@keyframes popIn { 0% { transform: scale(0) rotate(-180deg) translateZ(100px); } 100% { transform: scale(1) rotate(0deg) translateZ(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .hidden { display: none !important; }
-.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.stat-card { padding: 14px; text-align: center; }
-.stat-card h4 { margin: 0 0 4px; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-.stat-card p { margin: 0; font-size: 1.3rem; font-weight: 800; color: var(--neon-1); }
-.section-title { font-size: 1.1rem; font-weight: 800; margin: 20px 0 12px; display: flex; align-items: center; gap: 6px; }
+
+/* Video Player */
 .video-player-overlay { position: fixed; inset: 0; z-index: 500; background: var(--bg-1); display: flex; flex-direction: column; overflow-y: auto; }
 .player-header { position: sticky; top: 0; padding: 12px; background: var(--glass-bg); backdrop-filter: blur(20px); display: flex; align-items: center; gap: 10px; z-index: 10; border-bottom: 1px solid var(--glass-border); }
 .player-iframe-wrap { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
 .player-iframe-wrap iframe, .player-iframe-wrap video { width: 100%; height: 100%; border: 0; }
 .download-btn { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); z-index: 10;}
 .player-body { padding: 16px; }
-.progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin: 10px 0; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, var(--neon-1), var(--neon-3)); width: 0%; transition: width 0.3s; }
+.progress-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin: 10px 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--neon-1), var(--neon-3)); width: 0%; transition: width 0.3s; box-shadow: 0 0 10px var(--neon-1); }
 .action-row { display: flex; gap: 10px; margin: 12px 0; }
-.action-btn { flex: 1; padding: 10px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text); cursor: pointer; font-size: 0.85rem; }
-.action-btn.liked { background: linear-gradient(135deg, #ff3366, #ff0066); color: white; }
+.action-btn { flex: 1; padding: 12px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 700; }
+.action-btn.liked { background: linear-gradient(135deg, #ff3366, #ff0066); color: white; border: none; box-shadow: 0 0 15px #ff0066; }
 .comment-input-row { display: flex; gap: 8px; margin-top: 12px; }
 .comment-input-row input { flex: 1; margin: 0; }
 .comment-input-row button { width: auto; padding: 12px 20px; }
-.comment-item { padding: 10px; background: var(--glass-bg); border-radius: 12px; margin-bottom: 8px; font-size: 0.85rem; }
+.comment-item { padding: 12px; background: var(--glass-bg); border-radius: 12px; margin-bottom: 8px; font-size: 0.85rem; border: 1px solid var(--glass-border); }
 .comment-item .author { font-weight: 700; color: var(--neon-1); font-size: 0.8rem; }
 </style>
 </head>
@@ -88,7 +112,16 @@ body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; ba
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const cfg = { SUPABASE_URL: 'https://ttqrlrgdehwkoabiamty.supabase.co', SUPABASE_ANON_KEY: 'sb_publishable_6SU40N9QJZfPxsWYkIepSA_1PBOMvIl', BOT_USERNAME: 'TurkFlixbd_Bot', ADMIN_TELEGRAM_ID: 7609414654, APP_NAME: 'TurkFlix BD', COIN_TO_BDT: 1000, MIN_WITHDRAWAL: 1000 };
+const cfg = { 
+  SUPABASE_URL: 'https://ttqrlrgdehwkoabiamty.supabase.co', 
+  SUPABASE_ANON_KEY: 'sb_publishable_6SU40N9QJZfPxsWYkIepSA_1PBOMvIl', 
+  BOT_USERNAME: 'TurkFlixbd_Bot', 
+  ADMIN_TELEGRAM_ID: 7609414654, 
+  APP_NAME: 'TurkFlix BD', 
+  COIN_TO_BDT: 1000, 
+  MIN_WITHDRAWAL: 200000, // ২০০ টাকা = ২০০,০০০ কয়েন
+  WORKER_URL: 'https://mute-term-3df1.mdranjusadik4.workers.dev' // আপনার Worker লিংক
+};
 const supabase = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
 const tg = window.Telegram?.WebApp;
 let currentUser = null; let currentSettings = null;
@@ -139,64 +172,71 @@ function setupNav() {
     btn.onclick = () => {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
       const p = btn.dataset.page;
-      if (p === 'home') renderHome(); else if (p === 'explore') renderExplore(); else if (p === 'wallet') renderWallet(); else if (p === 'referral') renderReferral(); else if (p === 'profile') renderProfile();
+      if (p === 'home') renderHome(); else if (p === 'explore') renderExplore(''); else if (p === 'wallet') renderWallet(); else if (p === 'referral') renderReferral(); else if (p === 'profile') renderProfile();
     };
   });
 }
 
+// === হোমপেজ (ক্যাটাগরি + ভিডিও) ===
 async function renderHome() {
   const c = document.getElementById('pageContent');
   c.innerHTML = '<p style="text-align:center;padding:20px">Loading...</p>';
+  
+  const { data: cats } = await supabase.from('video_categories').select('*').eq('is_active', true).limit(10);
   const { data: videos } = await supabase.from('videos').select('*').eq('status', 'approved').order('published_at', { ascending: false }).limit(20);
 
-  let html = `<div class="glass-card stat-grid" style="padding:12px"><div class="stat-card"><h4>মোট কয়েন</h4><p>${currentUser.balance}</p></div><div class="stat-card"><h4>আজকের আয়</h4><p>${currentUser.today_earned}</p></div><div class="stat-card"><h4>রেফারেল</h4><p>${currentUser.total_referrals}</p></div><div class="stat-card"><h4>ভিডিও</h4><p>${videos?.length || 0}</p></div></div><h3 class="section-title">🔥 Videos</h3>`;
+  let html = `<h2 class="text-3d" style="margin-bottom:15px; font-size:1.5rem;">Explore Categories</h2>`;
+  
+  html += `<div class="cat-scroll">`;
+  if (cats && cats.length) {
+    html += cats.map(cat => `<div class="cat-card glass-card" onclick="window.loadCategory('${cat.id}')"><div class="cat-icon">${cat.icon || '📁'}</div><div class="cat-name">${cat.name}</div></div>`).join('');
+  }
+  html += `</div>`;
 
-  if (!videos || !videos.length) html += '<p style="text-align:center;padding:20px;color:var(--text-muted)">এখনো কোনো ভিডিও নেই। Admin Panel থেকে যোগ করুন।</p>';
+  html += `<h3 class="section-title">🔥 Latest Videos</h3>`;
+  if (!videos || !videos.length) html += '<p style="text-align:center;padding:20px;color:var(--text-muted)">কোনো ভিডিও নেই।</p>';
   else html += videos.map(v => videoCardHTML(v)).join('');
+  
   c.innerHTML = html; attachVideoCardEvents();
 }
 
+window.loadCategory = (catId) => {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-page="explore"]').classList.add('active');
+  renderExplore(catId);
+};
+
 function videoCardHTML(v) {
   const thumb = v.thumbnail_url || (v.youtube_id ? `https://img.youtube.com/vi/${v.youtube_id}/hqdefault.jpg` : 'https://via.placeholder.com/640x360/000/fff?text=Video');
-  return `<div class="glass-card video-card" data-video-id="${v.id}"><img class="video-thumb" src="${thumb}" alt="${esc(v.title)}"><div class="video-info"><p class="video-title">${esc(v.title)}</p><div class="video-meta"><span>👁 ${v.view_count}</span><span>❤ ${v.like_count}</span><span>💬 ${v.comment_count}</span><span class="reward-badge">🪙 +${v.reward_coins || currentSettings.video_watch_coins}</span></div></div></div>`;
+  return `<div class="glass-card video-card" data-video-id="${v.id}">
+    <img class="video-thumb" src="${thumb}" alt="${esc(v.title)}">
+    <div class="video-info">
+      <p class="video-title">${esc(v.title)}</p>
+      <div class="video-meta">
+        <span>👁 ${v.view_count}</span><span>❤ ${v.like_count}</span><span>💬 ${v.comment_count}</span>
+        <span class="reward-badge">🪙 +${v.reward_coins || currentSettings.video_watch_coins}</span>
+      </div>
+    </div>
+  </div>`;
 }
-
 function attachVideoCardEvents() { document.querySelectorAll('.video-card').forEach(card => { card.onclick = () => openPlayer(card.dataset.videoId); }); }
 
-// ====== মেইন প্লেয়ার এবং অটো-প্লে সিস্টেম ======
+// === প্লেয়ার (অটো-প্লে) ===
 async function openPlayer(videoId) {
   const { data: v } = await supabase.from('videos').select('*').eq('id', videoId).single();
   if (!v) return alert('Video not found');
-
-  // একই ক্যাটাগরির ভিডিওগুলোর প্লেলিস্ট তৈরি (অটো-প্লের জন্য)
   let playlist = [];
   if (v.category_id) {
     const { data: catVideos } = await supabase.from('videos').select('id').eq('category_id', v.category_id).eq('status', 'approved').order('published_at', { ascending: true });
     playlist = catVideos.map(item => item.id);
-  } else {
-    playlist = [v.id];
-  }
+  } else { playlist = [v.id]; }
   const currentIndex = playlist.indexOf(v.id);
-
-  // পুরনো প্লেয়ার থাকলে মুছে ফেলা
   const existingOverlay = document.querySelector('.video-player-overlay');
   if (existingOverlay) existingOverlay.remove();
 
-  const sessionId = crypto.randomUUID();
-  const watchStart = Date.now();
-  let maxWatched = 0;
-  let rewardGranted = false;
-
-  const overlay = document.createElement('div');
-  overlay.className = 'video-player-overlay';
-
-  let embedHtml = '';
-  if (v.source_type === 'youtube') {
-    // YouTube API এর মাধ্যমে ট্র্যাক করার জন্য iframe এ enablejsapi=1
-    embedHtml = `<iframe id="ytPlayer" src="https://www.youtube.com/embed/${v.youtube_id}?autoplay=1&enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-  } else {
-    embedHtml = `<video id="nativePlayer" src="${v.video_url}" controls autoplay playsinline></video><a href="${v.video_url}" download="${v.title}.mp4" target="_blank" class="download-btn">⬇️ Download</a>`;
-  }
+  const sessionId = crypto.randomUUID(); const watchStart = Date.now(); let maxWatched = 0; let rewardGranted = false;
+  const overlay = document.createElement('div'); overlay.className = 'video-player-overlay';
+  let embedHtml = v.source_type === 'youtube' ? `<iframe id="ytPlayer" src="https://www.youtube.com/embed/${v.youtube_id}?autoplay=1&enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>` : `<video id="nativePlayer" src="${v.video_url}" controls autoplay playsinline></video><a href="${v.video_url}" download="${v.title}.mp4" target="_blank" class="download-btn">⬇️ Download</a>`;
 
   overlay.innerHTML = `
     <div class="player-header"><button class="glass-btn" onclick="this.closest('.video-player-overlay').remove()">←</button><h3 class="text-3d-sm" style="flex:1">${esc(v.title)}</h3></div>
@@ -206,105 +246,48 @@ async function openPlayer(videoId) {
       <p id="watchStatus" style="text-align:center;font-size:0.8rem;color:var(--text-muted)">রিওয়ার্ড পেতে ভিডিও দেখুন</p>
       <div class="action-row">
         <button class="action-btn" id="likeBtn">❤ Like (${v.like_count})</button>
-        <button class="action-btn" id="shareBtn">🔗 Share</button>
+        <button class="action-btn" id="shareBtn">🔗 Share (${v.share_count})</button>
       </div>
       <h4>💬 Comments (${v.comment_count})</h4>
       <div class="comment-input-row"><input class="glass-input" id="commentInput" placeholder="কমেন্ট লিখুন..." maxlength="500"><button class="glass-btn primary" id="commentBtn">Post</button></div>
       <div id="commentsList" style="margin-top:12px"></div>
     </div>`;
   document.body.appendChild(overlay);
-
-  // ভিউ ডাটাবেসে সেভ
   await supabase.from('video_views').insert({ video_id: v.id, user_id: currentUser.id, session_id: sessionId, watched_seconds: 0 });
 
-  // ওয়াচ ট্র্যাকার
   const tracker = setInterval(async () => {
     if (!document.body.contains(overlay)) { clearInterval(tracker); return; }
-    const elapsed = Math.floor((Date.now() - watchStart) / 1000);
-    if (elapsed > maxWatched) maxWatched = elapsed;
-    
-    const minSec = currentSettings.video_watch_min_seconds || 30;
-    const pct = Math.min(100, (maxWatched / minSec) * 100);
-    const prog = document.getElementById('watchProg');
-    if (prog) prog.style.width = pct + '%';
-
+    const elapsed = Math.floor((Date.now() - watchStart) / 1000); if (elapsed > maxWatched) maxWatched = elapsed;
+    const minSec = currentSettings.video_watch_min_seconds || 30; const pct = Math.min(100, (maxWatched / minSec) * 100); const prog = document.getElementById('watchProg'); if (prog) prog.style.width = pct + '%';
     if (maxWatched >= minSec && !rewardGranted) {
-      rewardGranted = true;
-      // ডাটাবেসে ওয়াচ টাইম আপডেট
-      await supabase.from('video_views').update({ watched_seconds: maxWatched }).eq('session_id', sessionId);
-      
+      rewardGranted = true; await supabase.from('video_views').update({ watched_seconds: maxWatched }).eq('session_id', sessionId);
       const { data, error } = await supabase.rpc('reward_video_watch', { p_telegram_id: tg.initDataUnsafe.user.id, p_video_id: v.id, p_session_id: sessionId });
-      if (!error && data) {
-        showCoinPopup(currentSettings.video_watch_coins);
-        await refreshUser();
-        const ws = document.getElementById('watchStatus');
-        if (ws) ws.textContent = '✅ রিওয়ার্ড পেয়েছেন!';
-      }
+      if (!error && data) { showCoinPopup(currentSettings.video_watch_coins); await refreshUser(); const ws = document.getElementById('watchStatus'); if (ws) ws.textContent = '✅ রিওয়ার্ড পেয়েছেন!'; }
     }
   }, 2000);
 
-  // অটো-প্লে (পরের ভিডিও তে যাওয়া)
-  const goToNext = () => {
-    clearInterval(tracker);
-    if (currentIndex >= 0 && currentIndex < playlist.length - 1) {
-      const nextVideoId = playlist[currentIndex + 1];
-      openPlayer(nextVideoId); // প্লেলিস্টের পরের ভিডিও ওপেন করবে
-    } else {
-      // প্লেলিস্ট শেষ
-      alert('এই ক্যাটাগরির সব ভিডিও দেখা শেষ!');
-    }
-  };
-
+  const goToNext = () => { clearInterval(tracker); if (currentIndex >= 0 && currentIndex < playlist.length - 1) openPlayer(playlist[currentIndex + 1]); else alert('সব ভিডিও দেখা শেষ!'); };
   if (v.source_type === 'youtube') {
-    // YouTube Iframe API ইভেন্ট শোনার জন্য
-    const ytIframe = document.getElementById('ytPlayer');
-    if (ytIframe) {
-      ytIframe.addEventListener('load', () => {
-        ytIframe.contentWindow.postMessage('{"event":"listening","id":"ytPlayer"}', '*');
-      });
-      window.addEventListener('message', function(event) {
-        if (event.source === ytIframe.contentWindow) {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.event === 'onStateChange' && data.info === 0) { // 0 মানে ভিডিও শেষ
-              goToNext();
-            }
-          } catch(e){}
-        }
-      });
+    const ytIframe = document.getElementById('ytPlayer'); if (ytIframe) {
+      ytIframe.addEventListener('load', () => { ytIframe.contentWindow.postMessage('{"event":"listening","id":"ytPlayer"}', '*'); });
+      window.addEventListener('message', function(event) { if (event.source === ytIframe.contentWindow) { try { const data = JSON.parse(event.data); if (data.event === 'onStateChange' && data.info === 0) goToNext(); } catch(e){} } });
     }
-  } else {
-    // সাধারণ ভিডিওর জন্য onended
-    const nativePlayer = document.getElementById('nativePlayer');
-    if (nativePlayer) nativePlayer.onended = goToNext;
-  }
+  } else { const nativePlayer = document.getElementById('nativePlayer'); if (nativePlayer) nativePlayer.onended = goToNext; }
 
-  // লাইক
   document.getElementById('likeBtn').onclick = async (e) => {
     const { error } = await supabase.from('video_likes').insert({ video_id: v.id, user_id: currentUser.id });
     if (error && error.code === '23505') return alert('আগেই লাইক দিয়েছেন');
     if (error) return alert('Error: ' + error.message);
-    
-    // ডাটাবেসে কাউন্ট অটো বাড়বে (ট্রিগার এর মাধ্যমে)
     const { data, error: rErr } = await supabase.rpc('reward_like', { p_telegram_id: tg.initDataUnsafe.user.id, p_video_id: v.id });
-    if (!rErr && data) {
-      showCoinPopup(currentSettings.like_coins);
-      await refreshUser();
-      e.target.classList.add('liked');
-      e.target.textContent = `❤ Liked (${v.like_count + 1})`;
-    }
+    if (!rErr && data) { showCoinPopup(currentSettings.like_coins); await refreshUser(); e.target.classList.add('liked'); e.target.textContent = `❤ Liked (${v.like_count + 1})`; }
   };
 
-  // কমেন্ট
   document.getElementById('commentBtn').onclick = async () => {
-    const input = document.getElementById('commentInput');
-    const content = input.value.trim();
+    const input = document.getElementById('commentInput'); const content = input.value.trim();
     if (content.length < (currentSettings.comment_min_length || 10)) return alert(`কমপক্ষে ${currentSettings.comment_min_length || 10} অক্ষর`);
-    
     const { data: newComment, error } = await supabase.from('video_comments').insert({ video_id: v.id, user_id: currentUser.id, content }).select().single();
     if (error) return alert('Error: ' + error.message);
     input.value = '';
-    
     const { data, error: rErr } = await supabase.rpc('reward_comment', { p_telegram_id: tg.initDataUnsafe.user.id, p_comment_id: newComment.id });
     if (!rErr && data) { showCoinPopup(currentSettings.comment_coins); await refreshUser(); }
     loadComments(v.id);
@@ -321,24 +304,22 @@ async function openPlayer(videoId) {
 
 async function loadComments(videoId) {
   const { data } = await supabase.from('video_comments').select('*, users(first_name)').eq('video_id', videoId).eq('is_hidden', false).order('created_at', { ascending: false }).limit(20);
-  const list = document.getElementById('commentsList');
-  if (!list) return;
+  const list = document.getElementById('commentsList'); if (!list) return;
   if (!data || !data.length) { list.innerHTML = '<p style="color:var(--text-muted);text-align:center">কোনো কমেন্ট নেই</p>'; return; }
   list.innerHTML = data.map(c => `<div class="comment-item"><div class="author">${esc(c.users?.first_name || 'User')}</div><div>${esc(c.content)}</div></div>`).join('');
 }
 
-// বাকি পেজগুলো (Explore, Wallet, Referral, Profile) আগের মতোই থাকবে, কোনো পরিবর্তন নেই।
-async function renderExplore() {
+async function renderExplore(activeCatId = '') {
   const c = document.getElementById('pageContent');
   const { data: cats } = await supabase.from('video_categories').select('*').eq('is_active', true);
-  let html = '<h3 class="section-title">📂 Categories</h3><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">';
-  html += `<button class="glass-btn cat-btn active" data-cat="">সব</button>`;
-  html += cats.map(cat => `<button class="glass-btn cat-btn" data-cat="${cat.id}">${cat.icon} ${cat.name}</button>`).join('');
+  let html = '<h3 class="section-title">📂 Categories</h3><div class="cat-scroll" style="margin-bottom:16px">';
+  html += `<div class="cat-card glass-card ${activeCatId === '' ? 'active' : ''}" onclick="window.loadCategory('')"><div class="cat-icon">🌟</div><div class="cat-name">সব</div></div>`;
+  html += cats.map(cat => `<div class="cat-card glass-card ${activeCatId === cat.id ? 'active' : ''}" onclick="window.loadCategory('${cat.id}')"><div class="cat-icon">${cat.icon}</div><div class="cat-name">${cat.name}</div></div>`).join('');
   html += '</div><div id="exploreVideos"></div>';
   c.innerHTML = html;
-  document.querySelectorAll('.cat-btn').forEach(btn => { btn.onclick = () => { document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); loadExploreVideos(btn.dataset.cat); }; });
-  loadExploreVideos('');
+  loadExploreVideos(activeCatId);
 }
+
 async function loadExploreVideos(catId) {
   let q = supabase.from('videos').select('*').eq('status', 'approved').order('published_at', { ascending: false });
   if (catId) q = q.eq('category_id', catId);
@@ -348,34 +329,107 @@ async function loadExploreVideos(catId) {
   div.innerHTML = data.map(v => videoCardHTML(v)).join('');
   attachVideoCardEvents();
 }
+
+// === ওয়ালেট (উইথড্র ২০০ টাকা, ২০ রেফারেল ও গ্রুপ চেক) ===
 async function renderWallet() {
   const c = document.getElementById('pageContent');
   const { data: txs } = await supabase.from('coin_transactions').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(30);
-  const { data: wds } = await supabase.from('withdrawals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(10);
+
   c.innerHTML = `
-    <div class="glass-card" style="padding:20px;text-align:center"><h3 class="text-3d-sm">আমার ব্যালেন্স</h3><p class="text-3d" style="font-size:3rem;margin:8px 0">🪙 ${currentUser.balance}</p><p style="color:var(--text-muted);font-size:0.85rem">= ৳ ${(currentUser.balance / cfg.COIN_TO_BDT).toFixed(2)}</p></div>
-    <h3 class="section-title">💸 Withdraw</h3>
-    <div class="glass-card" style="padding:16px"><input class="glass-input" id="wdCoins" type="number" placeholder="কয়েন পরিমাণ" min="${cfg.MIN_WITHDRAWAL}"><select class="glass-input" id="wdMethod"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option></select><input class="glass-input" id="wdNumber" placeholder="মোবাইল নম্বর (01XXXXXXXXX)"><button class="glass-btn primary" id="wdBtn">Withdraw Request</button></div>
+    <div class="glass-card" style="padding:20px;text-align:center">
+      <h3 class="text-3d-sm">আমার ব্যালেন্স</h3>
+      <p class="text-3d" style="font-size:3rem;margin:8px 0">🪙 ${currentUser.balance}</p>
+      <p style="color:var(--text-muted);font-size:0.85rem">= ৳ ${(currentUser.balance / cfg.COIN_TO_BDT).toFixed(2)}</p>
+    </div>
+    
+    <div class="glass-card" style="padding:16px; margin-bottom:12px; border-color: var(--gold);">
+      <h4 style="color:var(--gold); margin-top:0;">💸 Withdrawal Rules</h4>
+      <p style="font-size:0.8rem; margin:4px 0;">• মিনিমাম উইথড্র: <b>২০০ টাকা</b> (${cfg.MIN_WITHDRAWAL} কয়েন)</p>
+      <p style="font-size:0.8rem; margin:4px 0;">• কমপক্ষে <b>২০ জন রেফারেল</b> থাকতে হবে</p>
+      <p style="font-size:0.8rem; margin:4px 0;">• আমাদের <b>টেলিগ্রাম গ্রুপ ও চ্যানেলে</b> জয়েন থাকতে হবে</p>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <a href="https://t.me/quizbangla247" target="_blank" class="glass-btn" style="text-decoration:none; text-align:center; flex:1;">Join Group 1</a>
+        <a href="https://t.me/linksharegroupbd98632" target="_blank" class="glass-btn" style="text-decoration:none; text-align:center; flex:1;">Join Group 2</a>
+      </div>
+    </div>
+
+    <div class="glass-card" style="padding:16px">
+      <input class="glass-input" id="wdCoins" type="number" placeholder="কয়েন পরিমাণ (মিনিমাম ২০০০০০)" min="${cfg.MIN_WITHDRAWAL}">
+      <select class="glass-input" id="wdMethod"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option></select>
+      <input class="glass-input" id="wdNumber" placeholder="মোবাইল নম্বর (01XXXXXXXXX)">
+      <button class="glass-btn primary" id="wdBtn">Withdraw Request</button>
+      <p id="wdStatus" style="text-align:center; font-size:0.8rem; margin-top:8px; color:var(--neon-1);"></p>
+    </div>
+
     <h3 class="section-title">📜 লেনদেন ইতিহাস</h3>
     <div class="glass-card" style="padding:8px">${(txs || []).length ? txs.map(t => `<div style="padding:10px;border-bottom:1px solid var(--glass-border);display:flex;justify-content:space-between;font-size:0.85rem"><div><div>${esc(t.description || t.type)}</div><div style="font-size:0.7rem;color:var(--text-muted)">${new Date(t.created_at).toLocaleString('bn')}</div></div><div style="color:${t.amount > 0 ? '#4ade80' : '#ff6b6b'};font-weight:700">${t.amount > 0 ? '+' : ''}${t.amount}</div></div>`).join('') : '<p style="text-align:center;padding:20px;color:var(--text-muted)">কোনো লেনদেন নেই</p>'}</div>`;
+
   document.getElementById('wdBtn').onclick = async () => {
     const coins = parseInt(document.getElementById('wdCoins').value); const method = document.getElementById('wdMethod').value; const number = document.getElementById('wdNumber').value.trim();
-    if (!coins || coins < cfg.MIN_WITHDRAWAL) return alert(`মিনিমাম ${cfg.MIN_WITHDRAWAL} কয়েন`); if (!/^01\d{9}$/.test(number)) return alert('সঠিক মোবাইল নম্বর দিন');
-    const { data, error } = await supabase.rpc('request_withdrawal', { p_telegram_id: tg.initDataUnsafe.user.id, p_coins: coins, p_method: method, p_number: number });
-    if (error) return alert('Error: ' + error.message); alert(`সফল! ${coins} কয়েন = ৳${data.bdt}`); await refreshUser(); renderWallet();
+    const statusEl = document.getElementById('wdStatus');
+    
+    if (!coins || coins < cfg.MIN_WITHDRAWAL) return alert(`মিনিমাম ${cfg.MIN_WITHDRAWAL} কয়েন (২০০ টাকা) লাগবে`); 
+    if (!/^01\d{9}$/.test(number)) return alert('সঠিক মোবাইল নম্বর দিন');
+
+    statusEl.textContent = 'গ্রুপ মেম্বারশিপ চেক করা হচ্ছে...';
+    
+    try {
+      const res = await fetch(`${cfg.WORKER_URL}/verify-groups`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: tg.initDataUnsafe.user.id }) });
+      const groupData = await res.json();
+      
+      if (!groupData.joined) {
+        statusEl.textContent = '';
+        return alert('❌ উইথড্র করতে প্রথমে আমাদের টেলিগ্রাম গ্রুপ এবং চ্যানেলে জয়েন করুন!');
+      }
+
+      statusEl.textContent = 'রেফারেল চেক করা হচ্ছে...';
+      const { data, error } = await supabase.rpc('request_withdrawal', { p_telegram_id: tg.initDataUnsafe.user.id, p_coins: coins, p_method: method, p_number: number });
+      
+      if (error) { statusEl.textContent = ''; return alert('Error: ' + error.message); }
+      
+      alert(`সফল! ${coins} কয়েন = ৳${data.bdt}`);
+      statusEl.textContent = 'সফলভাবে রিকোয়েস্ট পাঠানো হয়েছে!';
+      await refreshUser(); renderWallet();
+    } catch (e) {
+      statusEl.textContent = '';
+      alert('ভেরিফিকেশন ফেইল হয়েছে। আবার চেষ্টা করুন।');
+    }
   };
 }
+
 async function renderReferral() {
   const c = document.getElementById('pageContent');
   const link = `https://t.me/${cfg.BOT_USERNAME}?startapp=ref_${currentUser.referral_code}`;
   c.innerHTML = `<div class="glass-card" style="padding:20px;text-align:center"><h3 class="text-3d">👥 Refer & Earn</h3><p style="margin:12px 0;color:var(--text-muted);font-size:0.9rem">বন্ধুকে আমন্ত্রণ জানান, প্রতি সফল রেফারেলে <b style="color:var(--gold)">${currentSettings.referral_coins} কয়েন</b> পান!</p><div class="glass-input" style="word-break:break-all;font-size:0.75rem;text-align:left">${link}</div><button class="glass-btn primary" id="copyRefBtn" style="margin-top:10px">📋 Copy Link</button></div>`;
   document.getElementById('copyRefBtn').onclick = () => { navigator.clipboard.writeText(link); alert('লিংক কপি হয়েছে!'); };
 }
+
+// === প্রোফাইল (এখানে স্ট্যাটস সরানো হয়েছে) ===
 async function renderProfile() {
   const c = document.getElementById('pageContent');
   const { data: board } = await supabase.rpc('get_leaderboard', { p_period: 'all', p_limit: 10 });
-  c.innerHTML = `<div class="glass-card" style="padding:20px;text-align:center"><img src="${currentUser.photo_url || 'https://via.placeholder.com/80'}" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--neon-1)"><h3 class="text-3d" style="margin-top:10px">${esc(currentUser.first_name || 'User')}</h3><p style="color:var(--text-muted)">@${esc(currentUser.username || 'unknown')}</p>${currentUser.is_admin ? '<p style="color:var(--neon-2);font-weight:700">👑 ADMIN</p>' : ''}</div><h3 class="section-title">🏆 Leaderboard (Top 10)</h3><div class="glass-card" style="padding:8px">${(board || []).map(b => `<div style="padding:10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--glass-border)"><span style="font-weight:700;width:30px;color:${b.rank <= 3 ? 'var(--gold)' : 'var(--text-muted)'}">#${b.rank}</span><img src="${b.photo_url || 'https://via.placeholder.com/32'}" style="width:32px;height:32px;border-radius:50%"><div style="flex:1;font-size:0.9rem;font-weight:600">${esc(b.first_name || 'User')}</div><div style="color:var(--gold);font-weight:700">🪙 ${b.score}</div></div>`).join('')}</div>${currentUser.is_admin ? `<h3 class="section-title">⚙️ Admin</h3><div class="glass-card" style="padding:16px"><button class="glass-btn primary" onclick="window.location.href='admin.html'">Open Admin Panel</button></div>` : ''}`;
+  const { data: videos } = await supabase.from('videos').select('id').eq('status', 'approved');
+  
+  c.innerHTML = `
+    <div class="glass-card" style="padding:20px;text-align:center; margin-bottom:16px;">
+      <img src="${currentUser.photo_url || 'https://via.placeholder.com/80'}" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--neon-1); box-shadow:0 0 20px var(--neon-1);">
+      <h3 class="text-3d" style="margin-top:10px">${esc(currentUser.first_name || 'User')}</h3>
+      <p style="color:var(--text-muted)">@${esc(currentUser.username || 'unknown')}</p>
+      ${currentUser.is_admin ? '<p style="color:var(--neon-2);font-weight:700">👑 ADMIN</p>' : ''}
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><h4>মোট কয়েন</h4><p>${currentUser.balance}</p></div>
+      <div class="stat-card"><h4>আজকের আয়</h4><p>${currentUser.today_earned}</p></div>
+      <div class="stat-card"><h4>রেফারেল</h4><p>${currentUser.total_referrals}</p></div>
+      <div class="stat-card"><h4>মোট ভিডিও</h4><p>${videos?.length || 0}</p></div>
+    </div>
+
+    <h3 class="section-title">🏆 Leaderboard (Top 10)</h3>
+    <div class="glass-card" style="padding:8px">${(board || []).map(b => `<div style="padding:10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--glass-border)"><span style="font-weight:700;width:30px;color:${b.rank <= 3 ? 'var(--gold)' : 'var(--text-muted)'}">#${b.rank}</span><img src="${b.photo_url || 'https://via.placeholder.com/32'}" style="width:32px;height:32px;border-radius:50%"><div style="flex:1;font-size:0.9rem;font-weight:600">${esc(b.first_name || 'User')}</div><div style="color:var(--gold);font-weight:700">🪙 ${b.score}</div></div>`).join('')}</div>
+    ${currentUser.is_admin ? `<h3 class="section-title">⚙️ Admin</h3><div class="glass-card" style="padding:16px"><button class="glass-btn primary" onclick="window.location.href='admin.html'">Open Admin Panel</button></div>` : ''}`;
 }
+
 function showCoinPopup(amount) { const p = document.getElementById('coinPopup'); document.getElementById('coinPopupAmount').textContent = '+' + amount; p.classList.remove('hidden'); setTimeout(() => p.classList.add('hidden'), 1800); if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); }
 function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 init();
