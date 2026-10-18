@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - TurkFlix BD</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root[data-theme="dark"] {
+  --bg-1: #0a0a1a; --bg-2: #1a0a2e;
+  --glass-bg: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.12);
+  --text: #ffffff; --text-muted: #a0a0b0;
+  --neon-1: #00e5ff; --neon-3: #a855f7; --gold: #ffd700;
+}
+:root[data-theme="light"] {
+  --bg-1: #f0f4ff; --bg-2: #e0e7ff;
+  --glass-bg: rgba(255,255,255,0.7);
+  --glass-border: rgba(0,0,0,0.08);
+  --text: #1a1a2e; --text-muted: #666;
+  --neon-1: #0891b2; --neon-3: #7c3aed; --gold: #d97706;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
+  background-attachment: fixed; color: var(--text); min-height: 100vh;
+}
+.glass-card {
+  background: var(--glass-bg); backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border); border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3); padding: 16px; margin-bottom: 12px;
+}
+.glass-header {
+  position: sticky; top: 0; margin: 8px 12px;
+  padding: 12px 16px; display: flex; justify-content: space-between;
+  align-items: center; z-index: 50;
+  background: var(--glass-bg); backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border); border-radius: 16px;
+}
+.glass-btn {
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  color: var(--text); padding: 8px 16px; border-radius: 12px;
+  font-weight: 600; cursor: pointer; transition: transform 0.15s; font-size: 0.85rem;
+}
+.glass-btn:active { transform: scale(0.95); }
+.glass-btn.primary {
+  background: linear-gradient(135deg, var(--neon-1), var(--neon-3));
+  border: none; color: white; width: 100%; padding: 12px;
+}
+.glass-btn.danger { background: linear-gradient(135deg,#ff3b3b,#ff0066); border: none; color: white; }
+.glass-input {
+  width: 100%; padding: 12px; background: var(--glass-bg);
+  border: 1px solid var(--glass-border); border-radius: 12px;
+  color: var(--text); font-size: 0.9rem; margin-bottom: 10px; outline: none;
+}
+.glass-input:focus { border-color: var(--neon-1); }
+.text-3d {
+  font-weight: 900; font-size: 1.8rem; margin: 0;
+  background: linear-gradient(135deg, var(--neon-1), var(--neon-3));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-3d-sm { font-weight: 700; font-size: 0.9rem; }
+.loader-screen {
+  position: fixed; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); z-index: 9999;
+}
+.coin-3d {
+  font-size: 5rem; animation: coin-spin 2s infinite ease-in-out;
+  filter: drop-shadow(0 0 20px var(--gold));
+}
+@keyframes coin-spin {
+  0%, 100% { transform: rotateY(0deg) scale(1); }
+  50% { transform: rotateY(180deg) scale(1.1); }
+}
+.hidden { display: none !important; }
+.admin-tabs {
+  display: flex; gap: 6px; padding: 8px 12px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.admin-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 8px 14px; white-space: nowrap;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: 20px; color: var(--text-muted); cursor: pointer; font-size: 0.8rem;
+}
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--neon-1), var(--neon-3));
+  color: white; border: none;
+}
+.admin-content { padding: 12px; }
+.admin-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.85rem;
+}
+.admin-row:last-child { border: none; }
+.stat-box {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+}
+.stat-item {
+  background: var(--glass-bg); padding: 14px; border-radius: 12px; text-align: center;
+}
+.stat-item h4 { margin: 0; font-size: 0.7rem; color: var(--text-muted); }
+.stat-item p { margin: 4px 0 0; font-size: 1.4rem; font-weight: 800; color: var(--neon-1); }
+.section-title { font-size: 1rem; font-weight: 800; margin: 12px 0; }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<div id="adminApp">
+  <div id="loader" class="loader-screen">
+    <div class="coin-3d">⚙️</div>
+    <h1 class="text-3d">Admin Panel</h1>
+    <p>লোড হচ্ছে...</p>
+  </div>
+
+  <div id="adminMain" class="hidden">
+    <header class="glass-header">
+      <h2 class="text-3d-sm">⚙️ Admin Panel</h2>
+      <button class="glass-btn" onclick="location.href='index.html'">← App</button>
+    </header>
+
+    <div class="admin-tabs">
+      <button class="tab-btn active" data-tab="dashboard">📊 Stats</button>
+      <button class="tab-btn" data-tab="videos">📹 Videos</button>
+      <button class="tab-btn" data-tab="pending">⏳ Pending</button>
+      <button class="tab-btn" data-tab="users">👥 Users</button>
+      <button class="tab-btn" data-tab="withdrawals">💸 Withdrawals</button>
+      <button class="tab-btn" data-tab="settings">🪙 Settings</button>
+    </div>
+
+    <div class="admin-content" id="adminContent"></div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const cfg = {
+  SUPABASE_URL: 'https://ttqrlrgdehwkoabiamty.supabase.co', 
+  SUPABASE_ANON_KEY: 'sb_publishable_6SU40N9QJZfPxsWYkIepSA_1PBOMvIl',
+  ADMIN_TELEGRAM_ID: 7609414654,
+};
+
+const supabase = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+const tg = window.Telegram?.WebApp;
+
+let currentUser = null;
+let currentTab = 'dashboard';
+
+async function init() {
+  if (tg) { tg.ready(); tg.expand(); }
+
+  if (!tg?.initDataUnsafe?.user) {
+    document.getElementById('loader').innerHTML = '<p style="padding:20px;text-align:center">Telegram Bot থেকে খুলুন</p>';
+    return;
+  }
+
+  const u = tg.initDataUnsafe.user;
+  const { data } = await supabase.rpc('get_user_data', { p_telegram_id: u.id });
+  if (!data || !data.is_admin) {
+    document.getElementById('loader').innerHTML = '<p style="padding:20px;text-align:center;color:#ff6b6b">❌ আপনি Admin নন</p>';
+    return;
+  }
+  currentUser = data;
+
+  document.getElementById('loader').classList.add('hidden');
+  document.getElementById('adminMain').classList.remove('hidden');
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTab = btn.dataset.tab;
+      renderTab();
+    };
+  });
+  renderTab();
+}
+
+async function renderTab() {
+  const c = document.getElementById('adminContent');
+  c.innerHTML = '<p style="text-align:center;padding:20px">Loading...</p>';
+  if (currentTab === 'dashboard') await renderDashboard(c);
+  else if (currentTab === 'videos') await renderVideos(c);
+  else if (currentTab === 'pending') await renderPending(c);
+  else if (currentTab === 'users') await renderUsers(c);
+  else if (currentTab === 'withdrawals') await renderWithdrawals(c);
+  else if (currentTab === 'settings') await renderSettings(c);
+}
+
+async function renderDashboard(c) {
+  const [users, videos, pending, withdrawals] = await Promise.all([
+    supabase.from('users').select('id', { count: 'exact', head: true }),
+    supabase.from('videos').select('id', { count: 'exact', head: true }),
+    supabase.from('videos').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('withdrawals').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+  ]);
+  const { data: wallets } = await supabase.from('coin_wallets').select('balance');
+  const totalCoins = (wallets || []).reduce((s, w) => s + w.balance, 0);
+
+  c.innerHTML = `
+    <div class="stat-box">
+      <div class="stat-item"><h4>Total Users</h4><p>${users.count || 0}</p></div>
+      <div class="stat-item"><h4>Total Videos</h4><p>${videos.count || 0}</p></div>
+      <div class="stat-item"><h4>Pending Videos</h4><p>${pending.count || 0}</p></div>
+      <div class="stat-item"><h4>Pending Withdrawals</h4><p>${withdrawals.count || 0}</p></div>
+      <div class="stat-item" style="grid-column:1/-1"><h4>Total Coins in System</h4><p>🪙 ${totalCoins}</p></div>
+    </div>`;
+}
+
+async function renderVideos(c) {
+  const { data: videos } = await supabase.from('videos')
+    .select('*').order('created_at', { ascending: false }).limit(50);
+  const { data: cats } = await supabase.from('video_categories').select('*').eq('is_active', true);
+
+  c.innerHTML = `
+    <div class="glass-card">
+      <h3>➕ Add YouTube Video</h3>
+      <div class="form-group">
+        <label>YouTube URL</label>
+        <input class="glass-input" id="ytUrl" placeholder="https://youtube.com/watch?v=...">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select class="glass-input" id="ytCat">
+          ${(cats || []).map(cat => `<option value="${cat.id}">${cat.icon} ${cat.name}</option>`).join('')}
+        </select>
+      </div>
+      <button class="glass-btn primary" id="addYtBtn">Add Video</button>
+    </div>
+    <h3 class="section-title">📹 All Videos (${(videos || []).length})</h3>
+    ${(videos || []).map(v => `
+      <div class="glass-card">
+        <div class="admin-row">
+          <div>
+            <div style="font-weight:700">${esc(v.title)}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">${v.source_type} | ${v.status} | 👁${v.view_count} ❤${v.like_count}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            ${v.status === 'pending' ? `
+              <button class="glass-btn" onclick="window.approveVid('${v.id}')">✅</button>
+              <button class="glass-btn danger" onclick="window.rejectVid('${v.id}')">❌</button>
+            ` : ''}
+            <button class="glass-btn danger" onclick="window.deleteVid('${v.id}')">🗑</button>
+          </div>
+        </div>
+      </div>
+    `).join('')}`;
+
+  document.getElementById('addYtBtn').onclick = async () => {
+    const url = document.getElementById('ytUrl').value.trim();
+    const catId = document.getElementById('ytCat').value;
+    const ytId = extractYouTubeId(url);
+    if (!ytId) return alert('Invalid YouTube URL');
+    let title = 'YouTube Video';
+    let thumb = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+    try {
+      const r = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`);
+      const j = await r.json();
+      title = j.title;
+    } catch {}
+    const { error } = await supabase.from('videos').insert({
+      title, youtube_id: ytId, source_type: 'youtube',
+      thumbnail_url: thumb, category_id: catId,
+      status: 'approved', published_at: new Date().toISOString(),
+    });
+    if (error) return alert('Error: ' + error.message);
+    alert('ভিডিও যোগ হয়েছে!');
+    renderVideos(c);
+  };
+
+  window.approveVid = async (id) => {
+    await supabase.from('videos').update({ status: 'approved', published_at: new Date().toISOString() }).eq('id', id);
+    renderVideos(c);
+  };
+  window.rejectVid = async (id) => {
+    if (!confirm('Reject?')) return;
+    await supabase.from('videos').update({ status: 'rejected' }).eq('id', id);
+    renderVideos(c);
+  };
+  window.deleteVid = async (id) => {
+    if (!confirm('Delete permanently?')) return;
+    await supabase.from('videos').delete().eq('id', id);
+    renderVideos(c);
+  };
+}
+
+async function renderPending(c) {
+  const { data } = await supabase.from('videos').select('*')
+    .eq('status', 'pending').order('created_at', { ascending: false });
+  c.innerHTML = `<h3 class="section-title">⏳ Pending (${(data || []).length})</h3>
+    ${(data || []).length ? data.map(v => `
+      <div class="glass-card">
+        <div style="font-weight:700">${esc(v.title)}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin:6px 0">
+          ${v.source_type} | ${new Date(v.created_at).toLocaleString('bn')}
+        </div>
+        ${v.video_url ? `<video src="${v.video_url}" controls style="width:100%;border-radius:8px;margin:8px 0"></video>` : ''}
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="glass-btn" onclick="window.approveVid('${v.id}')" style="flex:1">✅ Approve</button>
+          <button class="glass-btn danger" onclick="window.rejectVid('${v.id}')" style="flex:1">❌ Reject</button>
+        </div>
+      </div>
+    `).join('') : '<p style="text-align:center;color:var(--text-muted);padding:20px">কোনো pending ভিডিও নেই</p>'}`;
+
+  window.approveVid = async (id) => {
+    await supabase.from('videos').update({ status: 'approved', published_at: new Date().toISOString() }).eq('id', id);
+    renderPending(c);
+  };
+  window.rejectVid = async (id) => {
+    await supabase.from('videos').update({ status: 'rejected' }).eq('id', id);
+    renderPending(c);
+  };
+}
+
+async function renderUsers(c) {
+  const { data } = await supabase.from('users').select('*').order('created_at', { ascending: false }).limit(50);
+  const { data: wallets } = await supabase.from('coin_wallets').select('*');
+  const walletMap = Object.fromEntries((wallets || []).map(w => [w.user_id, w]));
+
+  c.innerHTML = `<h3 class="section-title">👥 Users (${(data || []).length})</h3>
+    ${(data || []).map(u => {
+      const w = walletMap[u.id] || { balance: 0 };
+      return `
+        <div class="glass-card">
+          <div style="display:flex;gap:10px;align-items:center">
+            <img src="${u.photo_url || 'https://via.placeholder.com/40'}" style="width:40px;height:40px;border-radius:50%">
+            <div style="flex:1">
+              <div style="font-weight:700">${esc(u.first_name || 'User')} ${u.is_banned ? '🚫' : ''}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)">ID: ${u.telegram_id} | 🪙 ${w.balance}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="glass-btn" onclick="window.adjustCoins(${u.telegram_id})">🪙 Adjust</button>
+            ${u.is_banned
+              ? `<button class="glass-btn" onclick="window.unbanUser(${u.telegram_id})" style="background:#4ade80;color:#000">✅ Unban</button>`
+              : `<button class="glass-btn danger" onclick="window.banUser(${u.telegram_id})">🚫 Ban</button>`}
+          </div>
+        </div>`;
+    }).join('')}`;
+
+  window.adjustCoins = async (tgId) => {
+    const amt = parseInt(prompt('কয়েন পরিমাণ (+ যোগ / - বিয়োগ):'));
+    if (!amt) return;
+    const reason = prompt('কারণ:') || 'Admin adjustment';
+    const { error } = await supabase.rpc('admin_adjust_coins', {
+      p_admin_tg: tg.initDataUnsafe.user.id, p_target_tg: tgId,
+      p_amount: amt, p_reason: reason,
+    });
+    if (error) return alert('Error: ' + error.message);
+    alert('সফল!');
+    renderUsers(c);
+  };
+  window.banUser = async (tgId) => {
+    if (!confirm('Ban?')) return;
+    await supabase.from('users').update({ is_banned: true }).eq('telegram_id', tgId);
+    renderUsers(c);
+  };
+  window.unbanUser = async (tgId) => {
+    await supabase.from('users').update({ is_banned: false }).eq('telegram_id', tgId);
+    renderUsers(c);
+  };
+}
+
+async function renderWithdrawals(c) {
+  const { data } = await supabase.from('withdrawals')
+    .select('*, users(first_name, telegram_id)')
+    .order('created_at', { ascending: false }).limit(50);
+  c.innerHTML = `<h3 class="section-title">💸 Withdrawals</h3>
+    ${(data || []).length ? data.map(w => `
+      <div class="glass-card">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <div>
+            <div style="font-weight:700">🪙 ${w.coins_amount} = ৳${w.bdt_amount}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">
+              ${esc(w.users?.first_name || 'User')} | ${w.payment_method}: ${w.payment_number}
+            </div>
+          </div>
+          <span style="color:${w.status === 'completed' ? '#4ade80' : w.status === 'rejected' ? '#ff6b6b' : '#ffa500'};font-weight:700">${w.status}</span>
+        </div>
+        ${w.status === 'pending' ? `
+          <div style="display:flex;gap:6px">
+            <button class="glass-btn" onclick="window.completeWd('${w.id}')" style="flex:1;background:#4ade80;color:#000">✅ Complete</button>
+            <button class="glass-btn danger" onclick="window.rejectWd('${w.id}', ${w.coins_amount}, '${w.users?.telegram_id}')" style="flex:1">❌ Reject & Refund</button>
+          </div>` : ''}
+      </div>
+    `).join('') : '<p style="text-align:center;color:var(--text-muted);padding:20px">কোনো উইথড্রয়াল নেই</p>'}`;
+
+  window.completeWd = async (id) => {
+    await supabase.from('withdrawals').update({ status: 'completed', processed_at: new Date().toISOString() }).eq('id', id);
+    renderWithdrawals(c);
+  };
+  window.rejectWd = async (id, coins, tgId) => {
+    await supabase.from('withdrawals').update({ status: 'rejected', processed_at: new Date().toISOString() }).eq('id', id);
+    await supabase.rpc('admin_adjust_coins', {
+      p_admin_tg: tg.initDataUnsafe.user.id,
+      p_target_tg: parseInt(tgId),
+      p_amount: coins, p_reason: 'Withdrawal rejected - refund',
+    });
+    renderWithdrawals(c);
+  };
+}
+
+async function renderSettings(c) {
+  const { data: s } = await supabase.from('reward_settings').select('*').eq('id', 1).single();
+  c.innerHTML = `
+    <div class="glass-card">
+      <h3>🪙 Reward Settings</h3>
+      ${[
+        ['welcome_bonus_coins', 'Welcome Bonus Coins'],
+        ['video_watch_coins', 'Video Watch Reward'],
+        ['video_watch_min_seconds', 'Min Watch Seconds'],
+        ['like_coins', 'Like Reward'],
+        ['comment_coins', 'Comment Reward'],
+        ['share_coins', 'Share Reward'],
+        ['referral_coins', 'Referral Reward'],
+        ['daily_earning_limit', 'Daily Earning Limit'],
+        ['coin_to_bdt_rate', 'Coin to BDT Rate'],
+        ['min_withdrawal_coins', 'Min Withdrawal Coins'],
+      ].map(([k, label]) => `
+        <div class="form-group">
+          <label>${label}</label>
+          <input class="glass-input" type="number" data-key="${k}" value="${s[k]}">
+        </div>
+      `).join('')}
+      ${[
+        ['welcome_bonus_enabled', 'Welcome Bonus'],
+        ['video_watch_enabled', 'Video Watch Reward'],
+        ['like_enabled', 'Like Reward'],
+        ['comment_enabled', 'Comment Reward'],
+        ['share_enabled', 'Share Reward'],
+        ['referral_enabled', 'Referral'],
+        ['withdrawal_enabled', 'Withdrawal'],
+      ].map(([k, label]) => `
+        <div class="form-group" style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" data-toggle="${k}" ${s[k] ? 'checked' : ''}>
+          <label style="margin:0">${label} চালু</label>
+        </div>
+      `).join('')}
+      <button class="glass-btn primary" id="saveSettings">💾 Save Settings</button>
+    </div>`;
+
+  document.getElementById('saveSettings').onclick = async () => {
+    const updates = {};
+    c.querySelectorAll('input[data-key]').forEach(inp => { updates[inp.dataset.key] = parseInt(inp.value); });
+    c.querySelectorAll('input[data-toggle]').forEach(inp => { updates[inp.dataset.toggle] = inp.checked; });
+    updates.updated_at = new Date().toISOString();
+    const { error } = await supabase.from('reward_settings').update(updates).eq('id', 1);
+    if (error) return alert('Error: ' + error.message);
+    alert('✅ Settings saved!');
+  };
+}
+
+function extractYouTubeId(url) {
+  const m = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+  return m ? m[1] : null;
+}
+function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+init();
+</script>
+</body>
+</html>
