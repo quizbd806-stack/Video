@@ -1,11 +1,12 @@
 const ADMIN_ID = 7609414654;
-// এখানে ১ম টি আপনার ইসলামিক দুনিয়া, ২য় টি আপনার প্রাইভেট চ্যানেল (আইডি বসাতে হবে)
-const GROUPS_TO_POST = ['-1003978284561', '-100_REPLACE_ME']; 
+// Islami Dunia (Channel) এবং Link Share Group
+const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; 
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     
+    // ১. গ্রুপ ও চ্যানেল মেম্বারশিপ চেক API
     if (url.pathname === '/verify-groups' && request.method === 'POST') {
       const { userId } = await request.json();
       let allJoined = true;
@@ -25,6 +26,7 @@ export default {
       });
     }
 
+    // ২. অটো-পোস্ট API
     if (url.pathname === '/auto-post' && request.method === 'POST') {
       const { videoId, title, thumbnail_url, youtube_id } = await request.json();
       const appLink = `${env.MINI_APP_URL}?startapp=video_${videoId}`;
@@ -64,6 +66,7 @@ export default {
       });
     }
 
+    // ৩. বটের সাধারণ মেসেজ হ্যান্ডলার
     if (request.method === "POST") {
       try {
         const update = await request.json();
