@@ -15,7 +15,6 @@ export default {
 
     const url = new URL(request.url);
     
-    // ১. গ্রুপ ও চ্যানেল মেম্বারশিপ চেক API
     if (url.pathname === '/verify-groups' && request.method === 'POST') {
       const { userId } = await request.json();
       let allJoined = true; let errorDetails = [];
@@ -29,7 +28,6 @@ export default {
       return new Response(JSON.stringify({ joined: allJoined, errors: errorDetails }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // ২. অটো-পোস্ট API
     if (url.pathname === '/auto-post' && request.method === 'POST') {
       try {
         const { videoId, title, thumbnail_url, youtube_id } = await request.json();
@@ -69,7 +67,6 @@ export default {
       }
     }
 
-    // ৩. বটের মেসেজ হ্যান্ডলার
     if (request.method === "POST") {
       try {
         const update = await request.json();
@@ -89,7 +86,6 @@ async function handleMessage(msg, env) {
   const firstName = msg.from.first_name || "User";
   const isGroup = msg.chat.type === 'group' || msg.chat.type === 'supergroup';
 
-  // গ্রুপ বা চ্যানেলে /start বা /menu দিলে মেনু দেখাবে
   if ((text.startsWith("/start") || text.startsWith("/menu")) && isGroup) {
     const appLink = env.MINI_APP_URL;
     const welcomeText = `🎬 *TurkFlix BD*\n\nস্বাগতম ${firstName}!\n\nনিচের মেনু থেকে আপনার পছন্দের অপশন বেছে নিন 👇`;
@@ -98,14 +94,12 @@ async function handleMessage(msg, env) {
       inline_keyboard: [
         [{ text: "🎬 ভিডিও দেখুন (Videos)", callback_data: 'menu_cats' }],
         [{ text: "👤 আমার প্রোফাইল", callback_data: 'menu_profile' }, { text: "👥 রেফারেল", callback_data: 'menu_ref' }],
-        [{ text: "🌐 মিনি অ্যাপে খেলুন", url: appLink }] // গ্রুপে url বাটন ব্যবহার করতে হবে
+        [{ text: "🌐 মিনি অ্যাপে খেলুন", url: appLink }]
       ]
     };
-
     return sendMessage(env, chatId, welcomeText, { parse_mode: "Markdown", reply_markup: keyboard });
   }
 
-  // প্রাইভেট চ্যাটে /start বা /menu দিলে
   if (text.startsWith("/start") && !isGroup) {
     const startParam = text.split(" ")[1] || "";
     let appLink = env.MINI_APP_URL;
@@ -113,9 +107,7 @@ async function handleMessage(msg, env) {
        if(!appLink.includes('?')) appLink += `?startapp=${startParam}`;
        else appLink += `&startapp=${startParam}`;
     }
-
     const welcomeText = `🎬 *TurkFlix BD*\n\nস্বাগতম ${firstName}!\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন\n🎁 নতুন ইউজার বোনাস: ২০০০ কয়েন\n💸 ১০০০ কয়েন = ১ টাকা (মিনিমাম উইথড্র ২০০ টাকা)\n\nনিচের মেনু থেকে আপনার পছন্দের অপশন বেছে নিন 👇`;
-    
     const keyboard = {
       inline_keyboard: [
         [{ text: "🎬 ভিডিও দেখুন (Videos)", callback_data: 'menu_cats' }],
@@ -123,12 +115,10 @@ async function handleMessage(msg, env) {
         [{ text: "🌐 মিনি অ্যাপে খেলুন", web_app: { url: appLink } }]
       ]
     };
-
     if (userId === ADMIN_ID) {
       keyboard.inline_keyboard.push([{ text: "⚙️ Admin Panel", callback_data: 'admin_menu' }]);
       keyboard.inline_keyboard.push([{ text: "📢 Test Post to Groups", callback_data: 'test_post' }]); 
     }
-
     return sendMessage(env, chatId, welcomeText, { parse_mode: "Markdown", reply_markup: keyboard });
   }
   return new Response("OK");
@@ -138,10 +128,24 @@ async function handleCallback(cq, env) {
   const chatId = cq.message.chat.id;
   const userId = cq.from.id;
   const data = cq.data;
+  const messageId = cq.message.message_id;
+  const isGroup = cq.message.chat.type === 'group' || cq.message.chat.type === 'supergroup';
 
   if (data.startsWith('approve_') || data.startsWith('reject_') || data.startsWith('wd_')) {
      return handleAdminCallback(cq, env);
   }
+
+  // 🟢 গ্রুপে ক্লিক করলে নতুন মেসেজ পাঠানোর লজিক
+  const reply = (text, opts) => {
+      if (isGroup) {
+          // গ্রুপে রিপ্লাই হিসেবে মেসেজ পাঠাবে
+          const newOpts = { ...opts, reply_to_message_id: messageId };
+          return sendMessage(env, chatId, text, newOpts);
+      } else {
+          // প্রাইভেট চ্যাটে মেসেজ এডিট করবে
+          return editMessage(env, chatId, messageId, text, opts);
+      }
+  };
 
   if (data === 'test_post' && userId === ADMIN_ID) {
     await answerCallback(env, cq.id, "টেস্ট পোস্ট পাঠানো হচ্ছে...");
@@ -168,17 +172,17 @@ async function handleCallback(cq, env) {
 
   if (data === 'menu_cats') {
     await answerCallback(env, cq.id, "ক্যাটাগরি লোড হচ্ছে...");
-    return showCategories(env, chatId, cq.message.message_id);
+    return showCategories(env, chatId, messageId, isGroup);
   }
   
   if (data === 'menu_profile') {
     await answerCallback(env, cq.id, "প্রোফাইল লোড হচ্ছে...");
-    return showProfile(env, chatId, userId, cq.message.message_id);
+    return showProfile(env, chatId, userId, messageId, isGroup);
   }
   
   if (data === 'menu_ref') {
     await answerCallback(env, cq.id, "রেফারেল লোড হচ্ছে...");
-    return showReferral(env, chatId, userId, cq.message.message_id);
+    return showReferral(env, chatId, userId, messageId, isGroup);
   }
 
   if (data === 'menu_back') {
@@ -188,20 +192,20 @@ async function handleCallback(cq, env) {
       inline_keyboard: [
         [{ text: "🎬 ভিডিও দেখুন (Videos)", callback_data: 'menu_cats' }],
         [{ text: "👤 আমার প্রোফাইল", callback_data: 'menu_profile' }, { text: "👥 রেফারেল", callback_data: 'menu_ref' }],
-        [{ text: "🌐 মিনি অ্যাপে খেলুন", web_app: { url: appLink } }]
+        [{ text: "🌐 মিনি অ্যাপে খেলুন", isGroup ? { url: appLink } : { web_app: { url: appLink } } }]
       ]
     };
-    if (userId === ADMIN_ID) {
+    if (userId === ADMIN_ID && !isGroup) {
         keyboard.inline_keyboard.push([{ text: "⚙️ Admin Panel", callback_data: 'admin_menu' }]);
         keyboard.inline_keyboard.push([{ text: "📢 Test Post to Groups", callback_data: 'test_post' }]);
     }
-    return editMessage(env, chatId, cq.message.message_id, `🎬 *TurkFlix BD*\n\nস্বাগতম!\n\nনিচের মেনু থেকে অপশন বেছে নিন 👇`, { parse_mode: "Markdown", reply_markup: keyboard });
+    return reply(`🎬 *TurkFlix BD*\n\nস্বাগতম!\n\nনিচের মেনু থেকে অপশন বেছে নিন 👇`, { parse_mode: "Markdown", reply_markup: keyboard });
   }
 
   if (data.startsWith('cat_')) {
     const catId = data.split('_')[1];
     await answerCallback(env, cq.id, "ভিডিও লোড হচ্ছে...");
-    return showVideosByCategory(env, chatId, catId, cq.message.message_id);
+    return showVideosByCategory(env, chatId, catId, messageId, isGroup);
   }
 
   if (data.startsWith('vid_')) {
@@ -221,21 +225,23 @@ async function handleCallback(cq, env) {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
             chat_id: chatId, video: video.video_url, 
+            reply_to_message_id: isGroup ? messageId : undefined,
             caption: `🎬 *${video.title}*`, parse_mode: "Markdown",
-            reply_markup: { inline_keyboard: [[ { text: "🎬 Watch in App (Earn Coins)", web_app: { url: appLink } } ]] }
+            reply_markup: { inline_keyboard: [[ { text: "🎬 Watch in App (Earn Coins)", url: appLink } ]] }
         })
       });
     } else {
       return sendMessage(env, chatId, `🎬 *${video.title}*`, {
+        reply_to_message_id: isGroup ? messageId : undefined,
         parse_mode: "Markdown",
-        reply_markup: { inline_keyboard: [[ { text: "🎬 Watch in App (Earn Coins)", web_app: { url: appLink } } ]] }
+        reply_markup: { inline_keyboard: [[ { text: "🎬 Watch in App (Earn Coins)", url: appLink } ]] }
       });
     }
   }
   return new Response("OK");
 }
 
-async function showCategories(env, chatId, editMsgId = null) {
+async function showCategories(env, chatId, editMsgId, isGroup = false) {
   const res = await fetch(`${env.SUPABASE_URL}/rest/v1/video_categories?is_active=eq.true&select=*`, { headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}` } });
   const cats = await res.json();
   let keyboard = [];
@@ -247,12 +253,13 @@ async function showCategories(env, chatId, editMsgId = null) {
   }
   keyboard.push([{ text: "🔙 মেইন মেনু", callback_data: 'menu_back' }]);
   const text = `📂 *ভিডিও ক্যাটাগরি*\n\nনিচের যেকোনো একটি ক্যাটাগরিতে ক্লিক করে ভিডিও দেখুন:`;
-  const opts = { parse_mode: "Markdown", reply_markup: { inline_keyboard: keyboard } };
-  if (editMsgId) return editMessage(env, chatId, editMsgId, text, opts);
-  return sendMessage(env, chatId, text, opts);
+  const opts = { parse_mode: "Markdown", reply_markup: { inline_keyboard: keyboard }, reply_to_message_id: isGroup ? editMsgId : undefined };
+  
+  if (isGroup) return sendMessage(env, chatId, text, opts);
+  return editMessage(env, chatId, editMsgId, text, opts);
 }
 
-async function showVideosByCategory(env, chatId, catId, editMsgId) {
+async function showVideosByCategory(env, chatId, catId, editMsgId, isGroup = false) {
   const res = await fetch(`${env.SUPABASE_URL}/rest/v1/videos?category_id=eq.${catId}&status=eq.approved&select=id,title&limit=10`, { headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}` } });
   const videos = await res.json();
   let keyboard = [];
@@ -262,28 +269,36 @@ async function showVideosByCategory(env, chatId, catId, editMsgId) {
     keyboard.push([{ text: "এই ক্যাটাগরিতে কোনো ভিডিও নেই", callback_data: 'none' }]);
   }
   keyboard.push([{ text: "🔙 ক্যাটাগরিতে ফিরুন", callback_data: 'menu_cats' }]);
-  return editMessage(env, chatId, editMsgId, `📹 *ক্যাটাগরির ভিডিওগুলো*\n\nদেখতে চাওয়া ভিডিওতে ক্লিক করুন:`, { parse_mode: "Markdown", reply_markup: { inline_keyboard: keyboard } });
+  const text = `📹 *ক্যাটাগরির ভিডিওগুলো*\n\nদেখতে চাওয়া ভিডিওতে ক্লিক করুন:`;
+  const opts = { parse_mode: "Markdown", reply_markup: { inline_keyboard: keyboard }, reply_to_message_id: isGroup ? editMsgId : undefined };
+  
+  if (isGroup) return sendMessage(env, chatId, text, opts);
+  return editMessage(env, chatId, editMsgId, text, opts);
 }
 
-async function showProfile(env, chatId, userId, editMsgId = null) {
+async function showProfile(env, chatId, userId, editMsgId, isGroup = false) {
   const res = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/get_user_data`, { method: 'POST', headers: { 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_telegram_id: userId }) });
   const user = await res.json();
   if (!user || !user.id) return sendMessage(env, chatId, "❌ আপনি এখনো অ্যাকাউন্ট খোলেননি। /start দিন।");
   const text = `👤 *আপনার প্রোফাইল*\n\n🆔 *নাম:* ${user.first_name || 'User'}\n🔗 *ইউজারনেম:* @${user.username || 'N/A'}\n\n🪙 *মোট কয়েন:* ${user.balance}\n💸 *আজকের আয়:* ${user.today_earned}\n👥 *মোট রেফারেল:* ${user.total_referrals}\n\n_(মিনি অ্যাপে গিয়ে আরও বিস্তারিত দেখতে পারবেন)_`;
-  const keyboard = { inline_keyboard: [[{ text: "🌐 মিনি অ্যাপে ওপেন করুন", web_app: { url: env.MINI_APP_URL } }], [{ text: "🔙 মেইন মেনু", callback_data: 'menu_back' }]] };
-  if (editMsgId) return editMessage(env, chatId, editMsgId, text, { parse_mode: "Markdown", reply_markup: keyboard });
-  return sendMessage(env, chatId, text, { parse_mode: "Markdown", reply_markup: keyboard });
+  const keyboard = { inline_keyboard: [[{ text: "🌐 মিনি অ্যাপে ওপেন করুন", url: env.MINI_APP_URL }], [{ text: "🔙 মেইন মেনু", callback_data: 'menu_back' }]] };
+  const opts = { parse_mode: "Markdown", reply_markup: keyboard, reply_to_message_id: isGroup ? editMsgId : undefined };
+  
+  if (isGroup) return sendMessage(env, chatId, text, opts);
+  return editMessage(env, chatId, editMsgId, text, opts);
 }
 
-async function showReferral(env, chatId, userId, editMsgId = null) {
+async function showReferral(env, chatId, userId, editMsgId, isGroup = false) {
   const res = await fetch(`${env.SUPABASE_URL}/rest/v1/users?telegram_id=eq.${userId}&select=referral_code`, { headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}` } });
   const user = (await res.json())[0];
   if (!user || !user.referral_code) return sendMessage(env, chatId, "❌ ইউজার পাওয়া যায়নি।");
   const link = `https://t.me/${env.BOT_USERNAME || 'TurkFlixbd_Bot'}?startapp=ref_${user.referral_code}`;
   const text = `👥 *রেফারেল সিস্টেম*\n\nবন্ধুকে আমন্ত্রণ জানান, প্রতি সফল রেফারেলে কয়েন পান!\n\n🔗 *আপনার রেফারেল লিংক:*\n\`${link}\`\n\n_(লিংকে ক্লিক করে কপি করুন)_`;
   const keyboard = { inline_keyboard: [[{ text: "📤 টেলিগ্রামে শেয়ার করুন", url: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("🎬 ভিডিও দেখুন, কয়েন আয় করুন!")}` }], [{ text: "🔙 মেইন মেনু", callback_data: 'menu_back' }]] };
-  if (editMsgId) return editMessage(env, chatId, editMsgId, text, { parse_mode: "Markdown", reply_markup: keyboard });
-  return sendMessage(env, chatId, text, { parse_mode: "Markdown", reply_markup: keyboard });
+  const opts = { parse_mode: "Markdown", reply_markup: keyboard, reply_to_message_id: isGroup ? editMsgId : undefined };
+  
+  if (isGroup) return sendMessage(env, chatId, text, opts);
+  return editMessage(env, chatId, editMsgId, text, opts);
 }
 
 async function sendMessage(env, chatId, text, opts = {}) { return fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat_id: chatId, text, ...opts }) }); }
