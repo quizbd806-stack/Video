@@ -47,7 +47,6 @@ export default {
         for (const chatId of GROUPS_TO_POST) {
           let res;
           try {
-            // গ্রুপ ও চ্যানেলে web_app বাটন কাজ করে না, তাই url বাটন ব্যবহার করা হলো
             const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
             if (thumb) {
               res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`, {
@@ -98,7 +97,7 @@ async function handleMessage(msg, env) {
       inline_keyboard: [
         [{ text: "🎬 ভিডিও দেখুন (Videos)", callback_data: 'menu_cats' }],
         [{ text: "👤 আমার প্রোফাইল", callback_data: 'menu_profile' }, { text: "👥 রেফারেল", callback_data: 'menu_ref' }],
-        [{ text: "🌐 মিনি অ্যাপে খেলুন", url: appLink }] // গ্রুপে url বাটন
+        [{ text: "🌐 মিনি অ্যাপে খেলুন", url: appLink }]
       ]
     };
     return sendMessage(env, chatId, welcomeText, { parse_mode: "Markdown", reply_markup: keyboard });
@@ -184,7 +183,7 @@ async function handleCallback(cq, env) {
       inline_keyboard: [
         [{ text: "🎬 ভিডিও দেখুন (Videos)", callback_data: 'menu_cats' }],
         [{ text: "👤 আমার প্রোফাইল", callback_data: 'menu_profile' }, { text: "👥 রেফারেল", callback_data: 'menu_ref' }],
-        [{ text: "🌐 মিনি অ্যাপে খেলুন", isGroup ? { url: appLink } : { web_app: { url: appLink } } }]
+        [{ text: "🌐 মিনি অ্যাপে খেলুন", url: appLink }] // এখানে সবসময় url বাটন থাকবে
       ]
     };
     if (userId === ADMIN_ID && !isGroup) {
@@ -202,7 +201,6 @@ async function handleCallback(cq, env) {
     return showVideosByCategory(env, chatId, catId, messageId, isGroup);
   }
 
-  // 🔴 ভিডিও ওপেন করার লজিক ফিক্স
   if (data.startsWith('vid_')) {
     const vidId = data.split('_')[1];
     await answerCallback(env, cq.id, "ভিডিও ওপেন হচ্ছে...");
@@ -215,7 +213,6 @@ async function handleCallback(cq, env) {
     if (!appLink.includes('?')) appLink += `?startapp=video_${video.id}`;
     else appLink += `&startapp=video_${video.id}`;
     
-    // গ্রুপ/চ্যানেলে বাটনটি url হিসেবে পাঠানো হচ্ছে
     if (video.source_type === 'upload' && video.video_url) {
       return fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendVideo`, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -276,7 +273,7 @@ async function showProfile(env, chatId, userId, editMsgId, isGroup = false) {
   const res = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/get_user_data`, { method: 'POST', headers: { 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_telegram_id: userId }) });
   const user = await res.json();
   if (!user || !user.id) return sendMessage(env, chatId, "❌ আপনি এখনো অ্যাকাউন্ট খোলেননি। /start দিন।");
-  const text = `👤 *আপনার প্রোফাইল*\n\n🆔 *নাম:* ${user.first_name || 'User'}\n🔗 *ইউজারনেম:* @${user.username || 'N/A'}\n\n🪙 *মোট কয়েন:* ${user.balance}\n💸 *আজকের আয়:* ${user.today_earned}\n👥 *মোট রেফারেল:* ${user.total_referrals}\n\n_(মিনি অ্যাপে গিয়ে আরও বিস্তারিত দেখতে পারবেন)_`;
+  const text = `👤 *আপনার প্রোফাইল*\n\n🆔 *নাম:* ${user.first_name || 'User'}\n🔗 *ইউজারনেম:* @${user.username || 'N/A'}\n\n🪙 *মোট কয়েন:* ${user.balance}\n💸 *আজকের আয়:* ${user.today_earned}\n👥 *মোট রেফারেল:* ${user.total_referrals}\n\n_(মিনি অ্যাপে গিয়ে আরও বিস্তারিত দেখতে পারবেন)_`;
   const keyboard = { inline_keyboard: [[{ text: "🌐 মিনি অ্যাপে ওপেন করুন", url: env.MINI_APP_URL }], [{ text: "🔙 মেইন মেনু", callback_data: 'menu_back' }]] };
   const opts = { parse_mode: "Markdown", reply_markup: keyboard, reply_to_message_id: isGroup ? editMsgId : undefined };
   
@@ -287,7 +284,7 @@ async function showProfile(env, chatId, userId, editMsgId, isGroup = false) {
 async function showReferral(env, chatId, userId, editMsgId, isGroup = false) {
   const res = await fetch(`${env.SUPABASE_URL}/rest/v1/users?telegram_id=eq.${userId}&select=referral_code`, { headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}` } });
   const user = (await res.json())[0];
-  if (!user || !user.referral_code) return sendMessage(env, chatId, "❌ ইউজার পাওয়া যায়নি।");
+  if (!user || !user.referral_code) return sendMessage(env, chatId, "❌ ইউজার পাওয়া যায়নি।");
   const link = `https://t.me/${env.BOT_USERNAME || 'TurkFlixbd_Bot'}?startapp=ref_${user.referral_code}`;
   const text = `👥 *রেফারেল সিস্টেম*\n\nবন্ধুকে আমন্ত্রণ জানান, প্রতি সফল রেফারেলে কয়েন পান!\n\n🔗 *আপনার রেফারেল লিংক:*\n\`${link}\`\n\n_(লিংকে ক্লিক করে কপি করুন)_`;
   const keyboard = { inline_keyboard: [[{ text: "📤 টেলিগ্রামে শেয়ার করুন", url: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("🎬 ভিডিও দেখুন, কয়েন আয় করুন!")}` }], [{ text: "🔙 মেইন মেনু", callback_data: 'menu_back' }]] };
@@ -308,17 +305,17 @@ async function handleAdminCallback(cq, env) {
 
     if (action === "approve") {
         await fetch(`${env.SUPABASE_URL}/rest/v1/videos?id=eq.${id}`, { method: "PATCH", headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ status: "approved", published_at: new Date().toISOString() }) });
-        await answerCallback(env, cq.id, "✅ ভিডিও অ্যাপ্রুভ করা হয়েছে।");
+        await answerCallback(env, cq.id, "✅ ভিডিও অ্যাপ্রুভ করা হয়েছে।");
     } 
     else if (action === "reject") {
         await fetch(`${env.SUPABASE_URL}/rest/v1/videos?id=eq.${id}`, { method: "PATCH", headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected" }) });
-        await answerCallback(env, cq.id, "❌ ভিডিও রিজেক্ট করা হয়েছে।");
+        await answerCallback(env, cq.id, "❌ ভিডিও রিজেক্ট করা হয়েছে।");
     }
     else if (action === "wd") {
         const subAction = cq.data.split("_")[1]; const wdId = cq.data.split("_")[2];
         if (subAction === "complete") {
             await fetch(`${env.SUPABASE_URL}/rest/v1/withdrawals?id=eq.${wdId}`, { method: "PATCH", headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ status: "completed", processed_at: new Date().toISOString() }) });
-            await answerCallback(env, cq.id, "✅ উইথড্রয়াল সম্পন্ন হয়েছে।");
+            await answerCallback(env, cq.id, "✅ উইথড্রয়াল সম্পন্ন হয়েছে।");
         } else if (subAction === "reject") {
             await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/admin_adjust_coins`, { method: "POST", headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ p_admin_tg: ADMIN_ID, p_target_tg: cq.message.text.match(/\((\d+)\)/)[1], p_amount: parseInt(cq.message.text.match(/Amount: (\d+)/)[1]), p_reason: "Withdrawal rejected - refund" }) });
             await fetch(`${env.SUPABASE_URL}/rest/v1/withdrawals?id=eq.${wdId}`, { method: "PATCH", headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected", processed_at: new Date().toISOString() }) });
