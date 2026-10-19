@@ -1,8 +1,6 @@
 const ADMIN_ID = 7609414654;
-// ইসলামিক দুনিয়া (চ্যানেল) এবং লিংক শেয়ার গ্রুপ
 const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; 
 
-// CORS হেডার (Failed to fetch এরর সমাধানের জন্য)
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -40,12 +38,8 @@ export default {
         if (!appLink.includes('?')) appLink += `?startapp=video_${videoId}`;
         else appLink += `&startapp=video_${videoId}`;
 
-        // বট লিংক যুক্ত করা হলো
         const botLink = `https://t.me/TurkFlixbd_Bot`; 
-
         const thumb = thumbnail_url || (youtube_id ? `https://img.youtube.com/vi/${youtube_id}/hqdefault.jpg` : null);
-        
-        // ক্যাপশনে বট লিংক দেওয়া হলো
         const caption = `🎬 <b>${title}</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n🤖 <b>বট লিংক:</b> ${botLink}\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
         
         let postResults = [];
@@ -53,7 +47,6 @@ export default {
         for (const chatId of GROUPS_TO_POST) {
           let res;
           try {
-            // গ্রুপ ও চ্যানেলে কাজ করার জন্য url বাটন
             const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
             if (thumb) {
               res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`, {
@@ -94,29 +87,26 @@ async function handleMessage(msg, env) {
   const text = msg.text || "";
   const userId = msg.from.id;
   const firstName = msg.from.first_name || "User";
+  const isGroup = msg.chat.type === 'group' || msg.chat.type === 'supergroup';
 
-  if (text.startsWith("/post") && userId === ADMIN_ID) {
-    let appLink = env.MINI_APP_URL;
-    const botLink = `https://t.me/TurkFlixbd_Bot`;
-    const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n🤖 <b>বট লিংক:</b> ${botLink}\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
-    let resultMsg = "📊 *Post Results:*\n\n";
-    const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
+  // গ্রুপ বা চ্যানেলে /start বা /menu দিলে মেনু দেখাবে
+  if ((text.startsWith("/start") || text.startsWith("/menu")) && isGroup) {
+    const appLink = env.MINI_APP_URL;
+    const welcomeText = `🎬 *TurkFlix BD*\n\nস্বাগতম ${firstName}!\n\nনিচের মেনু থেকে আপনার পছন্দের অপশন বেছে নিন 👇`;
+    
+    const keyboard = {
+      inline_keyboard: [
+        [{ text: "🎬 ভিডিও দেখুন (Videos)", callback_data: 'menu_cats' }],
+        [{ text: "👤 আমার প্রোফাইল", callback_data: 'menu_profile' }, { text: "👥 রেফারেল", callback_data: 'menu_ref' }],
+        [{ text: "🌐 মিনি অ্যাপে খেলুন", url: appLink }] // গ্রুপে url বাটন ব্যবহার করতে হবে
+      ]
+    };
 
-    for (const chatIdStr of GROUPS_TO_POST) {
-      try {
-        const res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: chatIdStr, text: caption, parse_mode: "HTML", reply_markup: keyboard })
-        });
-        const resData = await res.json();
-        if (resData.ok) resultMsg += `✅ Chat ${chatIdStr}: Success\n`;
-        else resultMsg += `❌ Chat ${chatIdStr}: ${resData.description}\n`;
-      } catch (e) { resultMsg += `❌ Chat ${chatIdStr}: ${e.message}\n`; }
-    }
-    return sendMessage(env, chatId, resultMsg, { parse_mode: "Markdown" });
+    return sendMessage(env, chatId, welcomeText, { parse_mode: "Markdown", reply_markup: keyboard });
   }
 
-  if (text.startsWith("/start")) {
+  // প্রাইভেট চ্যাটে /start বা /menu দিলে
+  if (text.startsWith("/start") && !isGroup) {
     const startParam = text.split(" ")[1] || "";
     let appLink = env.MINI_APP_URL;
     if (startParam.startsWith("ref_")) {
