@@ -46,7 +46,6 @@ select.glass-input option { background: var(--bg-1); color: white; }
 
 <div id="adminApp">
   <div id="loader" class="loader-screen"><div class="coin-3d">⚙️</div><h1 class="text-3d">Admin Panel</h1><p>লোড হচ্ছে...</p></div>
-
   <div id="adminMain" class="hidden">
     <header class="glass-header">
       <h2 class="text-3d">⚙️ Admin</h2>
@@ -81,7 +80,6 @@ async function init() {
   if (!data || !data.is_admin) { document.getElementById('loader').innerHTML = '<p style="padding:20px;text-align:center;color:#ff6b6b;font-weight:bold;font-size:1.2rem;">❌ আপনি Admin নন</p>'; return; }
   currentUser = data;
   document.getElementById('loader').classList.add('hidden'); document.getElementById('adminMain').classList.remove('hidden');
-
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.onclick = () => { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); currentTab = btn.dataset.tab; renderTab(); };
   });
@@ -115,15 +113,13 @@ async function renderDashboard(c) {
 async function renderCategories(c) {
   const { data: cats } = await supabase.from('video_categories').select('*').order('created_at', { ascending: true });
   c.innerHTML = `<div class="glass-card"><h3 class="text-3d-sm" style="margin-top:0; margin-bottom:15px;">➕ নতুন ক্যাটাগরি তৈরি করুন</h3><div class="form-group"><label>ক্যাটাগরির নাম (বাংলা/ইংরেজি)</label><input class="glass-input" id="newCatName" placeholder="যেমন: কমেডি / Funny"></div><div class="form-group"><label>আইকন (ইমোজি)</label><input class="glass-input" id="newCatIcon" placeholder="যেমন: 😂" maxlength="2"></div><button class="glass-btn primary" id="addCatBtn">Add Category</button></div><h3 class="section-title">📂 সকল ক্যাটাগরি</h3>${(cats || []).map(cat => `<div class="glass-card" style="display:flex; justify-content:space-between; align-items:center; padding:15px; margin-bottom:10px;"><div style="font-weight:800; font-size:1.1rem; display:flex; align-items:center; gap:10px;"><span style="font-size:1.5rem;">${cat.icon || '📁'}</span> ${cat.name}</div><button class="glass-btn danger" onclick="window.deleteCat('${cat.id}')" style="padding:8px 12px;">🗑</button></div>`).join('')}`;
-  
   document.getElementById('addCatBtn').onclick = async () => {
     const name = document.getElementById('newCatName').value.trim(); const icon = document.getElementById('newCatIcon').value.trim() || '📁';
     if (!name) return alert('ক্যাটাগরির নাম দিন');
-    let slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, ''); 
-    if (slug === '' || slug === '-') { slug = 'cat-' + Date.now(); }
+    let slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, ''); if (slug === '' || slug === '-') { slug = 'cat-' + Date.now(); }
     const { error } = await supabase.from('video_categories').insert({ name, slug, icon, is_active: true });
     if (error) { if (error.code === '23505') return alert('এই ক্যাটাগরি আগেই আছে!'); return alert('Error: ' + error.message); }
-    alert('✅ ক্যাটাগরি তৈরি হয়েছে!'); renderCategories(c);
+    alert('✅ ক্যাটাগরি তৈরি হয়েছে!'); renderCategories(c);
   };
   window.deleteCat = async (id) => { if (!confirm('আপনি কি নিশ্চিত?')) return; await supabase.from('video_categories').delete().eq('id', id); renderCategories(c); };
 }
@@ -136,29 +132,18 @@ async function renderVideos(c) {
     <div class="glass-card" style="border: 1px solid var(--gold);"><h3 class="text-3d-sm" style="margin-top:0; margin-bottom:15px; color:var(--gold);">📱 Upload from Gallery</h3><div class="form-group"><input class="glass-input" id="upTitle" placeholder="Video Title"></div><div class="form-group"><select class="glass-input" id="upCat">${(cats || []).map(cat => `<option value="${cat.id}">${cat.icon} ${cat.name}</option>`).join('')}</select></div><div class="form-group"><input type="file" id="upFile" accept="video/mp4,video/webm" style="color:var(--text); font-weight:bold;"></div><button class="glass-btn primary" id="upBtn" style="background:linear-gradient(135deg, var(--gold), #ff9500); color:#000; box-shadow:0 5px 15px rgba(255,215,0,0.4);">Upload Video</button><p id="upProgress" style="text-align:center;font-size:0.85rem;color:var(--gold);margin-top:10px; font-weight:bold;"></p></div>
     <h3 class="section-title">📹 All Videos (${(videos || []).length})</h3>
     ${(videos || []).map(v => `<div class="glass-card" style="padding:15px;"><div class="admin-row"><div><div style="font-weight:800; font-size:0.95rem; margin-bottom:5px;">${esc(v.title)}</div><div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;"><span style="color:var(--neon-2);">${v.source_type.toUpperCase()}</span> | <span style="color:${v.status === 'approved' ? '#4ade80' : v.status === 'pending' ? '#ffa500' : '#ff6b6b'};">${v.status.toUpperCase()}</span> | 👁${v.view_count} ❤${v.like_count}</div></div><div style="display:flex;gap:8px;">${v.status === 'pending' ? `<button class="glass-btn" onclick="window.approveVid('${v.id}')" style="background:#4ade80;color:#000;">✅</button><button class="glass-btn danger" onclick="window.rejectVid('${v.id}')">❌</button>` : ''}<button class="glass-btn danger" onclick="window.deleteVid('${v.id}')">🗑</button></div></div></div>`).join('')}`;
-
   document.getElementById('addYtBtn').onclick = async () => {
     const url = document.getElementById('ytUrl').value.trim(); const catId = document.getElementById('ytCat').value; const ytId = extractYouTubeId(url);
     if (!ytId) return alert('Invalid YouTube URL');
     let title = 'YouTube Video'; let thumb = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
     try { const r = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`); const j = await r.json(); title = j.title; } catch {}
-    
     const { data: newVideo, error } = await supabase.from('videos').insert({ title, youtube_id: ytId, source_type: 'youtube', thumbnail_url: thumb, category_id: catId, status: 'approved', published_at: new Date().toISOString() }).select().single();
     if (error) return alert('Error: ' + error.message); 
-    
-    fetch(`${cfg.WORKER_URL}/auto-post`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ videoId: newVideo.id, title, thumbnail_url: thumb, youtube_id: ytId })
-    }).then(r => r.json()).then(data => {
-      if (data.results) {
-        const failed = data.results.filter(x => !x.success);
-        if (failed.length > 0) alert('ভিডিও অ্যাড হয়েছে, কিন্তু অটো-পোস্ট ব্যর্থ:\n' + failed.map(f => f.error).join('\n'));
-        else alert('✅ YouTube ভিডিও যোগ হয়েছে এবং গ্রুপ/চ্যানেলে পোস্ট করা হয়েছে!');
-      }
+    fetch(`${cfg.WORKER_URL}/auto-post`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ videoId: newVideo.id, title, thumbnail_url: thumb, youtube_id: ytId }) }).then(r => r.json()).then(data => {
+      if (data.results) { const failed = data.results.filter(x => !x.success); if (failed.length > 0) alert('ভিডিও অ্যাড হয়েছে, কিন্তু অটো-পোস্ট ব্যর্থ:\n' + failed.map(f => f.error).join('\n')); else alert('✅ YouTube ভিডিও যোগ হয়েছে এবং গ্রুপ/চ্যানেলে পোস্ট করা হয়েছে!'); }
     }).catch(e => console.error(e));
     renderVideos(c);
   };
-
   document.getElementById('upBtn').onclick = async () => {
     const title = document.getElementById('upTitle').value.trim(); const catId = document.getElementById('upCat').value; const file = document.getElementById('upFile').files[0]; const prog = document.getElementById('upProgress');
     if (!title || !file) return alert('Title এবং File দুটোই দিন'); if (file.size > 50 * 1024 * 1024) return alert('ফাইল সাইজ ৫০MB এর কম হতে হবে');
@@ -166,24 +151,15 @@ async function renderVideos(c) {
     const fileName = `${Date.now()}_${file.name}`;
     const { error: uploadErr } = await supabase.storage.from('videos').upload(fileName, file);
     if (uploadErr) { prog.textContent = ''; return alert('Upload Error: ' + uploadErr.message); }
-    
     const { data: urlData } = supabase.storage.from('videos').getPublicUrl(fileName);
     const { data: newVideo, error: dbErr } = await supabase.from('videos').insert({ title, source_type: 'upload', video_url: urlData.publicUrl, category_id: catId, status: 'approved', published_at: new Date().toISOString() }).select().single();
     if (dbErr) { prog.textContent = ''; return alert('DB Error: ' + dbErr.message); }
-    
-    fetch(`${cfg.WORKER_URL}/auto-post`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ videoId: newVideo.id, title, thumbnail_url: null, youtube_id: null })
-    }).then(r => r.json()).then(data => {
-      prog.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
-      if (data.results) {
-        const failed = data.results.filter(x => !x.success);
-        if (failed.length > 0) alert('ভিডিও আপলোড হয়েছে, কিন্তু অটো-পোস্ট ব্যর্থ:\n' + failed.map(f => f.error).join('\n'));
-      }
+    fetch(`${cfg.WORKER_URL}/auto-post`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ videoId: newVideo.id, title, thumbnail_url: null, youtube_id: null }) }).then(r => r.json()).then(data => {
+      prog.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
+      if (data.results) { const failed = data.results.filter(x => !x.success); if (failed.length > 0) alert('ভিডিও আপলোড হয়েছে, কিন্তু অটো-পোস্ট ব্যর্থ:\n' + failed.map(f => f.error).join('\n')); }
     }).catch(e => console.error(e));
     setTimeout(() => prog.textContent = '', 3000); renderVideos(c);
   };
-
   window.approveVid = async (id) => { await supabase.from('videos').update({ status: 'approved', published_at: new Date().toISOString() }).eq('id', id); renderVideos(c); };
   window.rejectVid = async (id) => { if (!confirm('Reject?')) return; await supabase.from('videos').update({ status: 'rejected' }).eq('id', id); renderVideos(c); };
   window.deleteVid = async (id) => { if (!confirm('Delete permanently?')) return; await supabase.from('videos').delete().eq('id', id); renderVideos(c); };
