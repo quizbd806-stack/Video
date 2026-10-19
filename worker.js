@@ -6,7 +6,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     
-    // ১. গ্রুপ ও চ্যানেল মেম্বারশিপ চেক API
     if (url.pathname === '/verify-groups' && request.method === 'POST') {
       const { userId } = await request.json();
       let allJoined = true; let errorDetails = [];
@@ -20,7 +19,6 @@ export default {
       return new Response(JSON.stringify({ joined: allJoined, errors: errorDetails }), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
-    // ২. অটো-পোস্ট API
     if (url.pathname === '/auto-post' && request.method === 'POST') {
       const { videoId, title, thumbnail_url, youtube_id } = await request.json();
       
@@ -35,9 +33,7 @@ export default {
       for (const chatId of GROUPS_TO_POST) {
         let res;
         try {
-          // গ্রুপ এবং চ্যানেলে web_app বাটন কাজ করে না, তাই url ব্যবহার করতে হবে
           const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
-          
           if (thumb) {
             res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`, {
               method: "POST", headers: { "Content-Type": "application/json" },
@@ -56,7 +52,6 @@ export default {
       return new Response(JSON.stringify({ status: "done", results: postResults }), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
-    // ৩. বটের মেসেজ হ্যান্ডলার
     if (request.method === "POST") {
       try {
         const update = await request.json();
@@ -75,13 +70,10 @@ async function handleMessage(msg, env) {
   const userId = msg.from.id;
   const firstName = msg.from.first_name || "User";
 
-  // 🟢 অ্যাডমিন টেস্ট পোস্ট কমান্ড
   if (text.startsWith("/post") && userId === ADMIN_ID) {
     let appLink = env.MINI_APP_URL;
     const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
     let resultMsg = "📊 *Post Results:*\n\n";
-    
-    // গ্রুপ এবং চ্যানেলের জন্য URL বাটন
     const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
 
     for (const chatIdStr of GROUPS_TO_POST) {
@@ -112,7 +104,7 @@ async function handleMessage(msg, env) {
       inline_keyboard: [
         [{ text: "🎬 ভিডিও দেখুন (Videos)", callback_data: 'menu_cats' }],
         [{ text: "👤 আমার প্রোফাইল", callback_data: 'menu_profile' }, { text: "👥 রেফারেল", callback_data: 'menu_ref' }],
-        [{ text: "🌐 মিনি অ্যাপে খেলুন", web_app: { url: appLink } }] // এখানে web_app কাজ করবে (প্রাইভেট চ্যাট)
+        [{ text: "🌐 মিনি অ্যাপে খেলুন", web_app: { url: appLink } }]
       ]
     };
 
@@ -213,7 +205,7 @@ async function handleCallback(cq, env) {
         body: JSON.stringify({ 
             chat_id: chatId, video: video.video_url, 
             caption: `🎬 *${video.title}*`, parse_mode: "Markdown",
-            reply_markup: { inline_keyboard: [[ { text: "🎬 Watch in App (Earn Coins)", web_app: { url: appLink } } ]] } // বটের চ্যাটে web_app কাজ করবে
+            reply_markup: { inline_keyboard: [[ { text: "🎬 Watch in App (Earn Coins)", web_app: { url: appLink } } ]] }
         })
       });
     } else {
