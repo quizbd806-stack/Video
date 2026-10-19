@@ -20,7 +20,11 @@ export default {
 
     if (url.pathname === '/auto-post' && request.method === 'POST') {
       const { videoId, title, thumbnail_url, youtube_id } = await request.json();
-      const appLink = `${env.MINI_APP_URL}?startapp=video_${videoId}`;
+      
+      let appLink = env.MINI_APP_URL;
+      if (!appLink.includes('?')) appLink += `?startapp=video_${videoId}`;
+      else appLink += `&startapp=video_${videoId}`;
+
       const thumb = thumbnail_url || (youtube_id ? `https://img.youtube.com/vi/${youtube_id}/hqdefault.jpg` : null);
       const caption = `🎬 <b>${title}</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
       let postResults = [];
@@ -67,7 +71,10 @@ async function handleMessage(msg, env) {
   if (text.startsWith("/start")) {
     const startParam = text.split(" ")[1] || "";
     let appLink = env.MINI_APP_URL;
-    if (startParam.startsWith("ref_")) appLink += `?startapp=${startParam}`;
+    if (startParam.startsWith("ref_")) {
+       if(!appLink.includes('?')) appLink += `?startapp=${startParam}`;
+       else appLink += `&startapp=${startParam}`;
+    }
 
     const welcomeText = `🎬 *TurkFlix BD*\n\nস্বাগতম ${firstName}!\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন\n🎁 নতুন ইউজার বোনাস: ২০০০ কয়েন\n💸 ১০০০ কয়েন = ১ টাকা (মিনিমাম উইথড্র ২০০ টাকা)\n\nনিচের মেনু থেকে আপনার পছন্দের অপশন বেছে নিন 👇`;
     
@@ -132,7 +139,6 @@ async function handleCallback(cq, env) {
     return showVideosByCategory(env, chatId, catId, cq.message.message_id);
   }
 
-  // 🔴 ভিডিও লিংক ফিক্স করা হলো এখানে
   if (data.startsWith('vid_')) {
     const vidId = data.split('_')[1];
     await answerCallback(env, cq.id, "ভিডিও ওপেন হচ্ছে...");
@@ -141,8 +147,10 @@ async function handleCallback(cq, env) {
     const video = (await res.json())[0];
     if (!video) return sendMessage(env, chatId, "❌ ভিডিওটি পাওয়া যায়নি।");
 
-    // এখানে startapp প্যারামিটারটি নিশ্চিত করা হলো
-    const appLink = `${env.MINI_APP_URL}?startapp=video_${video.id}`;
+    // 🟢 এখানে URL তৈরি করা হয়েছে নিখুঁতভাবে (URL এ ? থাকলেও সমস্যা হবে না)
+    let appLink = env.MINI_APP_URL;
+    if (!appLink.includes('?')) appLink += `?startapp=video_${video.id}`;
+    else appLink += `&startapp=video_${video.id}`;
     
     if (video.source_type === 'upload' && video.video_url) {
       return fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendVideo`, {
