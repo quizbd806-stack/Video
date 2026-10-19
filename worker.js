@@ -1,11 +1,23 @@
 const ADMIN_ID = 7609414654;
-// ইসলামিক দুনিয়া (চ্যানেল) এবং লিংক শেয়ার গ্রুপ
 const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; 
+
+// CORS হেডার (এরর সমাধানের জন্য জরুরি)
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
+};
 
 export default {
   async fetch(request, env) {
+    // ব্রাউজারের OPTIONS চেক রিকোয়েস্ট হ্যান্ডেল করা
+    if (request.method === 'OPTIONS') {
+      return new Response('ok', { headers: corsHeaders });
+    }
+
     const url = new URL(request.url);
     
+    // ১. গ্রুপ ও চ্যানেল মেম্বারশিপ চেক API
     if (url.pathname === '/verify-groups' && request.method === 'POST') {
       const { userId } = await request.json();
       let allJoined = true; let errorDetails = [];
@@ -16,42 +28,48 @@ export default {
           allJoined = false; errorDetails.push(`Chat ${chatId}: Not joined`);
         }
       }
-      return new Response(JSON.stringify({ joined: allJoined, errors: errorDetails }), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+      return new Response(JSON.stringify({ joined: allJoined, errors: errorDetails }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // ২. অটো-পোস্ট API
     if (url.pathname === '/auto-post' && request.method === 'POST') {
-      const { videoId, title, thumbnail_url, youtube_id } = await request.json();
-      
-      let appLink = env.MINI_APP_URL;
-      if (!appLink.includes('?')) appLink += `?startapp=video_${videoId}`;
-      else appLink += `&startapp=video_${videoId}`;
+      try {
+        const { videoId, title, thumbnail_url, youtube_id } = await request.json();
+        
+        let appLink = env.MINI_APP_URL;
+        if (!appLink.includes('?')) appLink += `?startapp=video_${videoId}`;
+        else appLink += `&startapp=video_${videoId}`;
 
-      const thumb = thumbnail_url || (youtube_id ? `https://img.youtube.com/vi/${youtube_id}/hqdefault.jpg` : null);
-      const caption = `🎬 <b>${title}</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
-      let postResults = [];
+        const thumb = thumbnail_url || (youtube_id ? `https://img.youtube.com/vi/${youtube_id}/hqdefault.jpg` : null);
+        const caption = `🎬 <b>${title}</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
+        let postResults = [];
 
-      for (const chatId of GROUPS_TO_POST) {
-        let res;
-        try {
-          const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
-          if (thumb) {
-            res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`, {
-              method: "POST", headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: chatId, photo: thumb, caption: caption, parse_mode: "HTML", reply_markup: keyboard })
-            });
-          } else {
-            res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-              method: "POST", headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: chatId, text: caption, parse_mode: "HTML", reply_markup: keyboard })
-            });
-          }
-          const resData = await res.json();
-          postResults.push({ chatId, success: resData.ok, error: resData.description });
-        } catch (e) { postResults.push({ chatId, success: false, error: e.message }); }
+        for (const chatId of GROUPS_TO_POST) {
+          let res;
+          try {
+            const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
+            if (thumb) {
+              res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, photo: thumb, caption: caption, parse_mode: "HTML", reply_markup: keyboard })
+              });
+            } else {
+              res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: caption, parse_mode: "HTML", reply_markup: keyboard })
+              });
+            }
+            const resData = await res.json();
+            postResults.push({ chatId, success: resData.ok, error: resData.description });
+          } catch (e) { postResults.push({ chatId, success: false, error: e.message }); }
+        }
+        return new Response(JSON.stringify({ status: "done", results: postResults }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: corsHeaders });
       }
-      return new Response(JSON.stringify({ status: "done", results: postResults }), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
+    // ৩. বটের মেসেজ হ্যান্ডলার
     if (request.method === "POST") {
       try {
         const update = await request.json();
@@ -60,7 +78,7 @@ export default {
       } catch (e) { console.error("Error:", e); }
       return new Response("OK", { status: 200 });
     }
-    return new Response("Bot is running!", { status: 200 });
+    return new Response("Bot is running perfectly!", { status: 200, headers: corsHeaders });
   }
 };
 
@@ -294,7 +312,7 @@ async function handleAdminCallback(cq, env) {
         } else if (subAction === "reject") {
             await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/admin_adjust_coins`, { method: "POST", headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ p_admin_tg: ADMIN_ID, p_target_tg: cq.message.text.match(/\((\d+)\)/)[1], p_amount: parseInt(cq.message.text.match(/Amount: (\d+)/)[1]), p_reason: "Withdrawal rejected - refund" }) });
             await fetch(`${env.SUPABASE_URL}/rest/v1/withdrawals?id=eq.${wdId}`, { method: "PATCH", headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ status: "rejected", processed_at: new Date().toISOString() }) });
-            await answerCallback(env, cq.id, "❌ উইথড্রয়াল রিজেক্ট ও রিফান্ড করা হয়েছে।");
+            await answerCallback(env, cq.id, "❌ উইথড্রয়াল রিজেক্ট ও রিফান্ড করা হয়েছে।");
         }
     }
     return new Response("OK");
