@@ -363,6 +363,7 @@ async function renderVideos(c) {
     const { data: newVideo, error } = await supabase.from('videos').insert({ title, youtube_id: ytId, source_type: 'youtube', thumbnail_url: thumb, category_id: catId, status: 'approved', published_at: new Date().toISOString() }).select().single();
     if (error) return alert('Error: ' + error.message); 
     
+    // অটো পোস্ট ফাংশন কল
     fetch(`${cfg.WORKER_URL}/auto-post`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ videoId: newVideo.id, title, thumbnail_url: thumb, youtube_id: ytId })
@@ -372,7 +373,7 @@ async function renderVideos(c) {
         if (failed.length > 0) alert('ভিডিও অ্যাড হয়েছে, কিন্তু অটো-পোস্ট ব্যর্থ:\n' + failed.map(f => f.error).join('\n'));
         else alert('✅ YouTube ভিডিও যোগ হয়েছে এবং গ্রুপ/চ্যানেলে পোস্ট করা হয়েছে!');
       }
-    }).catch(e => console.error(e));
+    }).catch(e => alert('অটো পোস্ট এরর: ' + e.message));
     renderVideos(c);
   };
 
@@ -422,6 +423,7 @@ async function renderVideos(c) {
     
     if (dbErr) { prog.textContent = ''; return alert('DB Error: ' + dbErr.message); }
     
+    // অটো পোস্ট ফাংশন কল
     fetch(`${cfg.WORKER_URL}/auto-post`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ videoId: newVideo.id, title, thumbnail_url: thumbUrl, youtube_id: null })
@@ -431,7 +433,7 @@ async function renderVideos(c) {
         const failed = data.results.filter(x => !x.success);
         if (failed.length > 0) alert('ভিডিও আপলোড হয়েছে, কিন্তু অটো-পোস্ট ব্যর্থ:\n' + failed.map(f => f.error).join('\n'));
       }
-    }).catch(e => console.error(e));
+    }).catch(e => alert('অটো পোস্ট এরর: ' + e.message));
     
     setTimeout(() => prog.textContent = '', 3000); 
     renderVideos(c);
