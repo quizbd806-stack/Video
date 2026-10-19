@@ -1,10 +1,11 @@
 const ADMIN_ID = 7609414654;
-const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; 
+const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; // আপনার গ্রুপ ও চ্যানেলের আইডি (ইসলামিক দুনিয়া ও লিংক শেয়ার গ্রুপ)
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     
+    // ১. গ্রুপ ও চ্যানেল মেম্বারশিপ চেক API
     if (url.pathname === '/verify-groups' && request.method === 'POST') {
       const { userId } = await request.json();
       let allJoined = true; let errorDetails = [];
@@ -18,6 +19,7 @@ export default {
       return new Response(JSON.stringify({ joined: allJoined, errors: errorDetails }), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
+    // ২. অটো-পোস্ট API (অ্যাডমিন প্যানেল থেকে কল হবে)
     if (url.pathname === '/auto-post' && request.method === 'POST') {
       const { videoId, title, thumbnail_url, youtube_id } = await request.json();
       
@@ -50,6 +52,7 @@ export default {
       return new Response(JSON.stringify({ status: "done", results: postResults }), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
+    // ৩. বটের মেসেজ হ্যান্ডলার
     if (request.method === "POST") {
       try {
         const update = await request.json();
@@ -67,6 +70,31 @@ async function handleMessage(msg, env) {
   const text = msg.text || "";
   const userId = msg.from.id;
   const firstName = msg.from.first_name || "User";
+
+  // 🟢 নতুন অ্যাডমিন কমান্ড: গ্রুপ ও চ্যানেলে মেসেজ পাঠানো
+  if (text.startsWith("/post") && userId === ADMIN_ID) {
+    let appLink = env.MINI_APP_URL;
+    const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
+    let resultMsg = "📊 *Post Results:*\n\n";
+
+    for (const chatIdStr of GROUPS_TO_POST) {
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatIdStr, text: caption, parse_mode: "HTML", reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn", web_app: { url: appLink } } ]] } })
+        });
+        const resData = await res.json();
+        if (resData.ok) {
+          resultMsg += `✅ Chat ${chatIdStr}: Success\n`;
+        } else {
+          resultMsg += `❌ Chat ${chatIdStr}: ${resData.description}\n`;
+        }
+      } catch (e) {
+        resultMsg += `❌ Chat ${chatIdStr}: ${e.message}\n`;
+      }
+    }
+    return sendMessage(env, chatId, resultMsg, { parse_mode: "Markdown" });
+  }
 
   if (text.startsWith("/start")) {
     const startParam = text.split(" ")[1] || "";
@@ -88,6 +116,7 @@ async function handleMessage(msg, env) {
 
     if (userId === ADMIN_ID) {
       keyboard.inline_keyboard.push([{ text: "⚙️ Admin Panel", callback_data: 'admin_menu' }]);
+      keyboard.inline_keyboard.push([{ text: "📢 Test Post to Groups", callback_data: 'test_post' }]); // নতুন বাটন
     }
 
     return sendMessage(env, chatId, welcomeText, { parse_mode: "Markdown", reply_markup: keyboard });
@@ -102,6 +131,28 @@ async function handleCallback(cq, env) {
 
   if (data.startsWith('approve_') || data.startsWith('reject_') || data.startsWith('wd_')) {
      return handleAdminCallback(cq, env);
+  }
+
+  // 🟢 নতুন বাটনের অ্যাকশন
+  if (data === 'test_post' && userId === ADMIN_ID) {
+    await answerCallback(env, cq.id, "টেস্ট পোস্ট পাঠানো হচ্ছে...");
+    
+    let appLink = env.MINI_APP_URL;
+    const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
+    let resultMsg = "📊 *Test Post Results:*\n\n";
+
+    for (const chatIdStr of GROUPS_TO_POST) {
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatIdStr, text: caption, parse_mode: "HTML", reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn", web_app: { url: appLink } } ]] } })
+        });
+        const resData = await res.json();
+        if (resData.ok) resultMsg += `✅ Chat ${chatIdStr}: Success\n`;
+        else resultMsg += `❌ Chat ${chatIdStr}: ${resData.description}\n`;
+      } catch (e) { resultMsg += `❌ Chat ${chatIdStr}: ${e.message}\n`; }
+    }
+    return sendMessage(env, chatId, resultMsg, { parse_mode: "Markdown" });
   }
 
   if (data === 'menu_cats') {
@@ -129,7 +180,10 @@ async function handleCallback(cq, env) {
         [{ text: "🌐 মিনি অ্যাপে খেলুন", web_app: { url: appLink } }]
       ]
     };
-    if (userId === ADMIN_ID) keyboard.inline_keyboard.push([{ text: "⚙️ Admin Panel", callback_data: 'admin_menu' }]);
+    if (userId === ADMIN_ID) {
+        keyboard.inline_keyboard.push([{ text: "⚙️ Admin Panel", callback_data: 'admin_menu' }]);
+        keyboard.inline_keyboard.push([{ text: "📢 Test Post to Groups", callback_data: 'test_post' }]);
+    }
     return editMessage(env, chatId, cq.message.message_id, `🎬 *TurkFlix BD*\n\nস্বাগতম!\n\nনিচের মেনু থেকে অপশন বেছে নিন 👇`, { parse_mode: "Markdown", reply_markup: keyboard });
   }
 
@@ -147,7 +201,6 @@ async function handleCallback(cq, env) {
     const video = (await res.json())[0];
     if (!video) return sendMessage(env, chatId, "❌ ভিডিওটি পাওয়া যায়নি।");
 
-    // 🟢 এখানে URL তৈরি করা হয়েছে নিখুঁতভাবে (URL এ ? থাকলেও সমস্যা হবে না)
     let appLink = env.MINI_APP_URL;
     if (!appLink.includes('?')) appLink += `?startapp=video_${video.id}`;
     else appLink += `&startapp=video_${video.id}`;
