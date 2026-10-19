@@ -316,7 +316,6 @@ async function renderVideos(c) {
         </select>
       </div>
 
-      <!-- থাম্বনেইল আপলোড অপশন -->
       <div class="form-group">
         <label style="color:var(--gold); font-weight:bold; margin-bottom:5px; display:block;">Thumbnail (Optional Image)</label>
         <input type="file" id="upThumb" accept="image/*" style="color:var(--text); font-weight:bold; padding:10px 0;">
@@ -382,7 +381,7 @@ async function renderVideos(c) {
     const title = document.getElementById('upTitle').value.trim(); 
     const catId = document.getElementById('upCat').value; 
     const file = document.getElementById('upFile').files[0]; 
-    const thumbFile = document.getElementById('upThumb').files[0]; // নতুন
+    const thumbFile = document.getElementById('upThumb').files[0];
     const prog = document.getElementById('upProgress');
 
     if (!title || !file) return alert('Title এবং Video File দুটোই দিন'); 
@@ -391,14 +390,12 @@ async function renderVideos(c) {
     prog.textContent = '⏳ ভিডিও আপলোড হচ্ছে... অপেক্ষা করুন';
     const fileName = `vid_${Date.now()}_${file.name}`;
     
-    // ভিডিও আপলোড
     const { error: uploadErr } = await supabase.storage.from('videos').upload(fileName, file);
     if (uploadErr) { prog.textContent = ''; return alert('Video Upload Error: ' + uploadErr.message); }
     
     const { data: urlData } = supabase.storage.from('videos').getPublicUrl(fileName);
     const videoUrl = urlData.publicUrl;
 
-    // থাম্বনেইল আপলোড (যদি দেওয়া হয়)
     let thumbUrl = null;
     if (thumbFile) {
         prog.textContent = '⏳ থাম্বনেইল আপলোড হচ্ছে...';
@@ -413,7 +410,6 @@ async function renderVideos(c) {
 
     prog.textContent = '⏳ ডাটাবেসে সেভ হচ্ছে...';
 
-    // ডাটাবেসে সেভ (thumbnail_url সহ)
     const { data: newVideo, error: dbErr } = await supabase.from('videos').insert({ 
         title, 
         source_type: 'upload', 
@@ -426,7 +422,6 @@ async function renderVideos(c) {
     
     if (dbErr) { prog.textContent = ''; return alert('DB Error: ' + dbErr.message); }
     
-    // অটো পোস্ট (গ্রুপে)
     fetch(`${cfg.WORKER_URL}/auto-post`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ videoId: newVideo.id, title, thumbnail_url: thumbUrl, youtube_id: null })
