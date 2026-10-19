@@ -117,16 +117,24 @@ async function init() {
     setupNav();
 
     // ==========================================
-    // 🟢 নতুন লজিক: ডিপ লিংক চেক (বট থেকে সরাসরি ভিডিও ওপেন)
+    // 🟢 নতুন ডিপ লিংক চেক (URL এবং Telegram Param দুটোই চেক করবে)
     // ==========================================
-    const startParam = tg?.initDataUnsafe?.start_param || '';
-    if (startParam.startsWith('video_')) {
-        const videoId = startParam.replace('video_', '');
-        // হোমপেজ ব্যাকগ্রাউন্ডে লোড হওয়ার পর অটোমেটিক ভিডিও প্লেয়ার ওপেন হবে
-        setTimeout(() => {
+    setTimeout(() => {
+        let startParam = tg?.initDataUnsafe?.start_param;
+        // যদি টেলিগ্রাম প্যারামিটার না পায়, তবে URL থেকে খুঁজবে
+        if (!startParam) {
+            const urlParams = new URLSearchParams(window.location.search);
+            startParam = urlParams.get('startapp');
+        }
+        
+        if (startParam && startParam.startsWith('video_')) {
+            const videoId = startParam.replace('video_', '');
+            // ওভারল্যাপ থাকলে রিমুভ করা
+            const existingOverlay = document.querySelector('.video-player-overlay');
+            if (existingOverlay) existingOverlay.remove();
             openPlayer(videoId);
-        }, 300);
-    }
+        }
+    }, 1000);
     
   } catch (err) {
     document.getElementById('loader').innerHTML = `<div style="padding:20px;text-align:center;color:#ff6b6b;font-size:1.2rem;font-weight:bold;">❌ ${err.message}<br><br><button onclick="location.reload()" style="padding:12px 25px;border-radius:12px;border:none;background:#ff6b6b;color:#fff;font-weight:800;box-shadow:0 4px 15px rgba(255,0,0,0.4);">Retry</button></div>`;
@@ -165,63 +173,68 @@ window.loadCategory = (catId) => { document.querySelectorAll('.nav-btn').forEach
 function videoCardHTML(v) { const thumb = v.thumbnail_url || (v.youtube_id ? `https://img.youtube.com/vi/${v.youtube_id}/hqdefault.jpg` : 'https://via.placeholder.com/640x360/000/fff?text=Video'); return `<div class="glass-card video-card" data-video-id="${v.id}"><img class="video-thumb" src="${thumb}" alt="${esc(v.title)}"><div class="video-info"><p class="video-title">${esc(v.title)}</p><div class="video-meta"><span>👁 ${v.view_count}</span><span>❤ ${v.like_count}</span><span>💬 ${v.comment_count}</span><span class="reward-badge">🪙 +${v.reward_coins || currentSettings.video_watch_coins}</span></div></div></div>`; }
 function attachVideoCardEvents() { document.querySelectorAll('.video-card').forEach(card => { card.onclick = () => openPlayer(card.dataset.videoId); }); }
 async function openPlayer(videoId) {
-  const { data: v } = await supabase.from('videos').select('*').eq('id', videoId).single();
-  if (!v) return alert('Video not found');
-  let playlist = [];
-  if (v.category_id) { const { data: catVideos } = await supabase.from('videos').select('id').eq('category_id', v.category_id).eq('status', 'approved').order('published_at', { ascending: true }); playlist = catVideos.map(item => item.id); } else { playlist = [v.id]; }
-  const currentIndex = playlist.indexOf(v.id); const existingOverlay = document.querySelector('.video-player-overlay'); if (existingOverlay) existingOverlay.remove();
-  const sessionId = crypto.randomUUID(); const watchStart = Date.now(); let maxWatched = 0; let rewardGranted = false;
-  const overlay = document.createElement('div'); overlay.className = 'video-player-overlay';
-  let embedHtml = '';
-  if (v.source_type === 'youtube') { embedHtml = `<iframe id="ytPlayer" src="https://www.youtube.com/embed/${v.youtube_id}?autoplay=1&enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`; } else { embedHtml = `<video id="nativePlayer" src="${v.video_url}" controls autoplay playsinline></video><a href="${v.video_url}" download="${v.title}.mp4" target="_blank" class="download-btn">⬇️ Download</a>`; }
-  overlay.innerHTML = `
-    <div class="player-header"><button class="glass-btn" onclick="this.closest('.video-player-overlay').remove()">←</button><h3 class="text-3d-sm" style="flex:1; margin:0; line-height:1.4;">${esc(v.title)}</h3></div>
-    <div class="player-iframe-wrap">${embedHtml}</div>
-    <div class="player-body">
-      <div class="progress-bar"><div class="progress-fill" id="watchProg"></div></div>
-      <p id="watchStatus" style="text-align:center;font-size:0.9rem;font-weight:700;color:var(--gold);text-shadow:0 2px 5px rgba(0,0,0,0.5);">রিওয়ার্ড পেতে ভিডিও দেখুন</p>
-      <div class="action-row"><button class="action-btn" id="likeBtn">❤ Like (${v.like_count})</button><button class="action-btn" id="shareBtn">🔗 Share (${v.share_count})</button></div>
-      <h4 style="margin:25px 0 15px 0; font-size:1.1rem; font-weight:800; text-shadow:0 2px 5px rgba(0,0,0,0.5);">💬 Comments (${v.comment_count})</h4>
-      <div class="comment-input-row"><input class="glass-input" id="commentInput" placeholder="কমেন্ট লিখুন..." maxlength="500"><button class="glass-btn primary" id="commentBtn">Post</button></div>
-      <div id="commentsList" style="margin-top:20px"></div>
-    </div>`;
-  document.body.appendChild(overlay);
-  await supabase.from('video_views').insert({ video_id: v.id, user_id: currentUser.id, session_id: sessionId, watched_seconds: 0 });
-  const tracker = setInterval(async () => {
-    if (!document.body.contains(overlay)) { clearInterval(tracker); return; }
-    const elapsed = Math.floor((Date.now() - watchStart) / 1000); if (elapsed > maxWatched) maxWatched = elapsed;
-    const minSec = currentSettings.video_watch_min_seconds || 30; const pct = Math.min(100, (maxWatched / minSec) * 100); const prog = document.getElementById('watchProg'); if (prog) prog.style.width = pct + '%';
-    if (maxWatched >= minSec && !rewardGranted) {
-      rewardGranted = true; await supabase.from('video_views').update({ watched_seconds: maxWatched }).eq('session_id', sessionId);
-      const { data, error } = await supabase.rpc('reward_video_watch', { p_telegram_id: tg.initDataUnsafe.user.id, p_video_id: v.id, p_session_id: sessionId });
-      if (!error && data) { showCoinPopup(currentSettings.video_watch_coins, 'কয়েন অর্জিত!'); await refreshUser(); const ws = document.getElementById('watchStatus'); if (ws) { ws.textContent = '✅ রিওয়ার্ড পেয়েছেন!'; ws.style.color = 'var(--neon-1)'; } }
-    }
-  }, 2000);
-  const goToNext = () => { clearInterval(tracker); if (currentIndex >= 0 && currentIndex < playlist.length - 1) openPlayer(playlist[currentIndex + 1]); else alert('সব ভিডিও দেখা শেষ!'); };
-  if (v.source_type === 'youtube') {
-    const ytIframe = document.getElementById('ytPlayer'); if (ytIframe) { ytIframe.addEventListener('load', () => { ytIframe.contentWindow.postMessage('{"event":"listening","id":"ytPlayer"}', '*'); }); window.addEventListener('message', function(event) { if (event.source === ytIframe.contentWindow) { try { const data = JSON.parse(event.data); if (data.event === 'onStateChange' && data.info === 0) goToNext(); } catch(e){} } }); }
-  } else { const nativePlayer = document.getElementById('nativePlayer'); if (nativePlayer) nativePlayer.onended = goToNext; }
-  document.getElementById('likeBtn').onclick = async (e) => {
-    const { error } = await supabase.from('video_likes').insert({ video_id: v.id, user_id: currentUser.id });
-    if (error && error.code === '23505') return alert('আগেই লাইক দিয়েছেন'); if (error) return alert('Error: ' + error.message);
-    const { data, error: rErr } = await supabase.rpc('reward_like', { p_telegram_id: tg.initDataUnsafe.user.id, p_video_id: v.id });
-    if (!rErr && data) { showCoinPopup(currentSettings.like_coins, 'লাইক রিওয়ার্ড!'); await refreshUser(); e.target.classList.add('liked'); e.target.textContent = `❤ Liked (${v.like_count + 1})`; }
-  };
-  document.getElementById('commentBtn').onclick = async () => {
-    const input = document.getElementById('commentInput'); const content = input.value.trim();
-    if (content.length < (currentSettings.comment_min_length || 10)) return alert(`কমপক্ষে ${currentSettings.comment_min_length || 10} অক্ষর লিখুন`);
-    const { data: newComment, error } = await supabase.from('video_comments').insert({ video_id: v.id, user_id: currentUser.id, content }).select().single();
-    if (error) return alert('Error: ' + error.message); input.value = '';
-    const { data, error: rErr } = await supabase.rpc('reward_comment', { p_telegram_id: tg.initDataUnsafe.user.id, p_comment_id: newComment.id });
-    if (!rErr && data) { showCoinPopup(currentSettings.comment_coins, 'কমেন্ট রিওয়ার্ড!'); await refreshUser(); }
-    loadComments(v.id);
-  };
-  document.getElementById('shareBtn').onclick = async () => {
-    const link = `https://t.me/${cfg.BOT_USERNAME}?startapp=video_${v.id}`;
-    if (tg) tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(v.title)}`);
-    await supabase.from('video_shares').insert({ video_id: v.id, user_id: currentUser.id });
-  };
-  loadComments(v.id);
+  try {
+      const { data: v, error } = await supabase.from('videos').select('*').eq('id', videoId).single();
+      if (error || !v) return alert('Video not found');
+      let playlist = [];
+      if (v.category_id) { const { data: catVideos } = await supabase.from('videos').select('id').eq('category_id', v.category_id).eq('status', 'approved').order('published_at', { ascending: true }); playlist = catVideos.map(item => item.id); } else { playlist = [v.id]; }
+      const currentIndex = playlist.indexOf(v.id); const existingOverlay = document.querySelector('.video-player-overlay'); if (existingOverlay) existingOverlay.remove();
+      const sessionId = crypto.randomUUID(); const watchStart = Date.now(); let maxWatched = 0; let rewardGranted = false;
+      const overlay = document.createElement('div'); overlay.className = 'video-player-overlay';
+      let embedHtml = '';
+      if (v.source_type === 'youtube') { embedHtml = `<iframe id="ytPlayer" src="https://www.youtube.com/embed/${v.youtube_id}?autoplay=1&enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`; } else { embedHtml = `<video id="nativePlayer" src="${v.video_url}" controls autoplay playsinline></video><a href="${v.video_url}" download="${v.title}.mp4" target="_blank" class="download-btn">⬇️ Download</a>`; }
+      overlay.innerHTML = `
+        <div class="player-header"><button class="glass-btn" onclick="this.closest('.video-player-overlay').remove()">←</button><h3 class="text-3d-sm" style="flex:1; margin:0; line-height:1.4;">${esc(v.title)}</h3></div>
+        <div class="player-iframe-wrap">${embedHtml}</div>
+        <div class="player-body">
+          <div class="progress-bar"><div class="progress-fill" id="watchProg"></div></div>
+          <p id="watchStatus" style="text-align:center;font-size:0.9rem;font-weight:700;color:var(--gold);text-shadow:0 2px 5px rgba(0,0,0,0.5);">রিওয়ার্ড পেতে ভিডিও দেখুন</p>
+          <div class="action-row"><button class="action-btn" id="likeBtn">❤ Like (${v.like_count})</button><button class="action-btn" id="shareBtn">🔗 Share (${v.share_count})</button></div>
+          <h4 style="margin:25px 0 15px 0; font-size:1.1rem; font-weight:800; text-shadow:0 2px 5px rgba(0,0,0,0.5);">💬 Comments (${v.comment_count})</h4>
+          <div class="comment-input-row"><input class="glass-input" id="commentInput" placeholder="কমেন্ট লিখুন..." maxlength="500"><button class="glass-btn primary" id="commentBtn">Post</button></div>
+          <div id="commentsList" style="margin-top:20px"></div>
+        </div>`;
+      document.body.appendChild(overlay);
+      await supabase.from('video_views').insert({ video_id: v.id, user_id: currentUser.id, session_id: sessionId, watched_seconds: 0 });
+      const tracker = setInterval(async () => {
+        if (!document.body.contains(overlay)) { clearInterval(tracker); return; }
+        const elapsed = Math.floor((Date.now() - watchStart) / 1000); if (elapsed > maxWatched) maxWatched = elapsed;
+        const minSec = currentSettings.video_watch_min_seconds || 30; const pct = Math.min(100, (maxWatched / minSec) * 100); const prog = document.getElementById('watchProg'); if (prog) prog.style.width = pct + '%';
+        if (maxWatched >= minSec && !rewardGranted) {
+          rewardGranted = true; await supabase.from('video_views').update({ watched_seconds: maxWatched }).eq('session_id', sessionId);
+          const { data, error } = await supabase.rpc('reward_video_watch', { p_telegram_id: tg.initDataUnsafe.user.id, p_video_id: v.id, p_session_id: sessionId });
+          if (!error && data) { showCoinPopup(currentSettings.video_watch_coins, 'কয়েন অর্জিত!'); await refreshUser(); const ws = document.getElementById('watchStatus'); if (ws) { ws.textContent = '✅ রিওয়ার্ড পেয়েছেন!'; ws.style.color = 'var(--neon-1)'; } }
+        }
+      }, 2000);
+      const goToNext = () => { clearInterval(tracker); if (currentIndex >= 0 && currentIndex < playlist.length - 1) openPlayer(playlist[currentIndex + 1]); else alert('সব ভিডিও দেখা শেষ!'); };
+      if (v.source_type === 'youtube') {
+        const ytIframe = document.getElementById('ytPlayer'); if (ytIframe) { ytIframe.addEventListener('load', () => { ytIframe.contentWindow.postMessage('{"event":"listening","id":"ytPlayer"}', '*'); }); window.addEventListener('message', function(event) { if (event.source === ytIframe.contentWindow) { try { const data = JSON.parse(event.data); if (data.event === 'onStateChange' && data.info === 0) goToNext(); } catch(e){} } }); }
+      } else { const nativePlayer = document.getElementById('nativePlayer'); if (nativePlayer) nativePlayer.onended = goToNext; }
+      document.getElementById('likeBtn').onclick = async (e) => {
+        const { error } = await supabase.from('video_likes').insert({ video_id: v.id, user_id: currentUser.id });
+        if (error && error.code === '23505') return alert('আগেই লাইক দিয়েছেন'); if (error) return alert('Error: ' + error.message);
+        const { data, error: rErr } = await supabase.rpc('reward_like', { p_telegram_id: tg.initDataUnsafe.user.id, p_video_id: v.id });
+        if (!rErr && data) { showCoinPopup(currentSettings.like_coins, 'লাইক রিওয়ার্ড!'); await refreshUser(); e.target.classList.add('liked'); e.target.textContent = `❤ Liked (${v.like_count + 1})`; }
+      };
+      document.getElementById('commentBtn').onclick = async () => {
+        const input = document.getElementById('commentInput'); const content = input.value.trim();
+        if (content.length < (currentSettings.comment_min_length || 10)) return alert(`কমপক্ষে ${currentSettings.comment_min_length || 10} অক্ষর লিখুন`);
+        const { data: newComment, error } = await supabase.from('video_comments').insert({ video_id: v.id, user_id: currentUser.id, content }).select().single();
+        if (error) return alert('Error: ' + error.message); input.value = '';
+        const { data, error: rErr } = await supabase.rpc('reward_comment', { p_telegram_id: tg.initDataUnsafe.user.id, p_comment_id: newComment.id });
+        if (!rErr && data) { showCoinPopup(currentSettings.comment_coins, 'কমেন্ট রিওয়ার্ড!'); await refreshUser(); }
+        loadComments(v.id);
+      };
+      document.getElementById('shareBtn').onclick = async () => {
+        const link = `https://t.me/${cfg.BOT_USERNAME}?startapp=video_${v.id}`;
+        if (tg) tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(v.title)}`);
+        await supabase.from('video_shares').insert({ video_id: v.id, user_id: currentUser.id });
+      };
+      loadComments(v.id);
+  } catch (err) {
+      console.error("Open Player Error:", err);
+      alert("ভিডিওটি ওপেন করতে সমস্যা হচ্ছে।");
+  }
 }
 async function loadComments(videoId) {
   const { data } = await supabase.from('video_comments').select('*, users(first_name)').eq('video_id', videoId).eq('is_hidden', false).order('created_at', { ascending: false }).limit(20);
