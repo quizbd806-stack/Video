@@ -267,7 +267,6 @@ async function renderCategories(c) {
     
     if (!name) return alert('ক্যাটাগরির নাম দিন');
 
-    // বাংলা স্লাগ হ্যান্ডেল করার লজিক
     let slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, ''); 
     if (slug === '' || slug === '-') {
       slug = 'cat-' + Date.now(); 
@@ -310,14 +309,24 @@ async function renderVideos(c) {
     <div class="glass-card" style="border: 1px solid var(--gold); box-shadow: 0 10px 40px rgba(255,215,0,0.15);">
       <h3 class="text-3d-sm" style="margin-top:0; margin-bottom:18px; color:var(--gold);">📱 Upload from Gallery</h3>
       <div class="form-group"><input class="glass-input" id="upTitle" placeholder="Video Title"></div>
+      
       <div class="form-group">
         <select class="glass-input" id="upCat">
           ${(cats || []).map(cat => `<option value="${cat.id}">${cat.icon} ${cat.name}</option>`).join('')}
         </select>
       </div>
+
+      <!-- থাম্বনেইল আপলোড অপশন -->
       <div class="form-group">
+        <label style="color:var(--gold); font-weight:bold; margin-bottom:5px; display:block;">Thumbnail (Optional Image)</label>
+        <input type="file" id="upThumb" accept="image/*" style="color:var(--text); font-weight:bold; padding:10px 0;">
+      </div>
+
+      <div class="form-group">
+        <label style="color:var(--neon-1); font-weight:bold; margin-bottom:5px; display:block;">Video File</label>
         <input type="file" id="upFile" accept="video/mp4,video/webm" style="color:var(--text); font-weight:bold; padding:10px 0;">
       </div>
+      
       <button class="glass-btn primary" id="upBtn" style="background:linear-gradient(135deg, var(--gold), #ff9500); color:#000;">Upload Video</button>
       <p id="upProgress" style="text-align:center;font-size:0.9rem;color:var(--gold);margin-top:12px; font-weight:800;"></p>
     </div>
@@ -345,6 +354,7 @@ async function renderVideos(c) {
       </div>
     `).join('')}`;
 
+  // YouTube Add Logic
   document.getElementById('addYtBtn').onclick = async () => {
     const url = document.getElementById('ytUrl').value.trim(); const catId = document.getElementById('ytCat').value; const ytId = extractYouTubeId(url);
     if (!ytId) return alert('Invalid YouTube URL');
@@ -354,7 +364,6 @@ async function renderVideos(c) {
     const { data: newVideo, error } = await supabase.from('videos').insert({ title, youtube_id: ytId, source_type: 'youtube', thumbnail_url: thumb, category_id: catId, status: 'approved', published_at: new Date().toISOString() }).select().single();
     if (error) return alert('Error: ' + error.message); 
     
-    // অটো পোস্ট ট্রিগার
     fetch(`${cfg.WORKER_URL}/auto-post`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ videoId: newVideo.id, title, thumbnail_url: thumb, youtube_id: ytId })
@@ -368,23 +377,59 @@ async function renderVideos(c) {
     renderVideos(c);
   };
 
+  // Gallery Upload Logic (With Thumbnail)
   document.getElementById('upBtn').onclick = async () => {
-    const title = document.getElementById('upTitle').value.trim(); const catId = document.getElementById('upCat').value; const file = document.getElementById('upFile').files[0]; const prog = document.getElementById('upProgress');
-    if (!title || !file) return alert('Title এবং File দুটোই দিন'); if (file.size > 50 * 1024 * 1024) return alert('ফাইল সাইজ ৫০MB এর কম হতে হবে');
+    const title = document.getElementById('upTitle').value.trim(); 
+    const catId = document.getElementById('upCat').value; 
+    const file = document.getElementById('upFile').files[0]; 
+    const thumbFile = document.getElementById('upThumb').files[0]; // নতুন
+    const prog = document.getElementById('upProgress');
+
+    if (!title || !file) return alert('Title এবং Video File দুটোই দিন'); 
+    if (file.size > 50 * 1024 * 1024) return alert('ফাইল সাইজ ৫০MB এর কম হতে হবে');
     
-    prog.textContent = '⏳ আপলোড হচ্ছে... অপেক্ষা করুন';
-    const fileName = `${Date.now()}_${file.name}`;
+    prog.textContent = '⏳ ভিডিও আপলোড হচ্ছে... অপেক্ষা করুন';
+    const fileName = `vid_${Date.now()}_${file.name}`;
+    
+    // ভিডিও আপলোড
     const { error: uploadErr } = await supabase.storage.from('videos').upload(fileName, file);
-    if (uploadErr) { prog.textContent = ''; return alert('Upload Error: ' + uploadErr.message); }
+    if (uploadErr) { prog.textContent = ''; return alert('Video Upload Error: ' + uploadErr.message); }
     
     const { data: urlData } = supabase.storage.from('videos').getPublicUrl(fileName);
-    const { data: newVideo, error: dbErr } = await supabase.from('videos').insert({ title, source_type: 'upload', video_url: urlData.publicUrl, category_id: catId, status: 'approved', published_at: new Date().toISOString() }).select().single();
+    const videoUrl = urlData.publicUrl;
+
+    // থাম্বনেইল আপলোড (যদি দেওয়া হয়)
+    let thumbUrl = null;
+    if (thumbFile) {
+        prog.textContent = '⏳ থাম্বনেইল আপলোড হচ্ছে...';
+        const thumbName = `thumb_${Date.now()}_${thumbFile.name}`;
+        const { error: thumbErr } = await supabase.storage.from('videos').upload(thumbName, thumbFile);
+        
+        if (!thumbErr) {
+            const { data: thumbData } = supabase.storage.from('videos').getPublicUrl(thumbName);
+            thumbUrl = thumbData.publicUrl;
+        }
+    }
+
+    prog.textContent = '⏳ ডাটাবেসে সেভ হচ্ছে...';
+
+    // ডাটাবেসে সেভ (thumbnail_url সহ)
+    const { data: newVideo, error: dbErr } = await supabase.from('videos').insert({ 
+        title, 
+        source_type: 'upload', 
+        video_url: videoUrl, 
+        thumbnail_url: thumbUrl, 
+        category_id: catId, 
+        status: 'approved', 
+        published_at: new Date().toISOString() 
+    }).select().single();
+    
     if (dbErr) { prog.textContent = ''; return alert('DB Error: ' + dbErr.message); }
     
-    // অটো পোস্ট ট্রিগার
+    // অটো পোস্ট (গ্রুপে)
     fetch(`${cfg.WORKER_URL}/auto-post`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ videoId: newVideo.id, title, thumbnail_url: null, youtube_id: null })
+      body: JSON.stringify({ videoId: newVideo.id, title, thumbnail_url: thumbUrl, youtube_id: null })
     }).then(r => r.json()).then(data => {
       prog.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
       if (data.results) {
@@ -392,6 +437,7 @@ async function renderVideos(c) {
         if (failed.length > 0) alert('ভিডিও আপলোড হয়েছে, কিন্তু অটো-পোস্ট ব্যর্থ:\n' + failed.map(f => f.error).join('\n'));
       }
     }).catch(e => console.error(e));
+    
     setTimeout(() => prog.textContent = '', 3000); 
     renderVideos(c);
   };
