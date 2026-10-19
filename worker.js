@@ -1,5 +1,6 @@
 const ADMIN_ID = 7609414654;
-const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; // আপনার গ্রুপ ও চ্যানেলের আইডি (ইসলামিক দুনিয়া ও লিংক শেয়ার গ্রুপ)
+// আপনার গ্রুপ এবং চ্যানেলের সঠিক আইডি
+const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; 
 
 export default {
   async fetch(request, env) {
@@ -19,7 +20,7 @@ export default {
       return new Response(JSON.stringify({ joined: allJoined, errors: errorDetails }), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
-    // ২. অটো-পোস্ট API (অ্যাডমিন প্যানেল থেকে কল হবে)
+    // ২. অটো-পোস্ট API
     if (url.pathname === '/auto-post' && request.method === 'POST') {
       const { videoId, title, thumbnail_url, youtube_id } = await request.json();
       
@@ -71,7 +72,7 @@ async function handleMessage(msg, env) {
   const userId = msg.from.id;
   const firstName = msg.from.first_name || "User";
 
-  // 🟢 নতুন অ্যাডমিন কমান্ড: গ্রুপ ও চ্যানেলে মেসেজ পাঠানো
+  // নতুন অ্যাডমিন কমান্ড: টেস্ট পোস্ট
   if (text.startsWith("/post") && userId === ADMIN_ID) {
     let appLink = env.MINI_APP_URL;
     const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
@@ -84,14 +85,9 @@ async function handleMessage(msg, env) {
           body: JSON.stringify({ chat_id: chatIdStr, text: caption, parse_mode: "HTML", reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn", web_app: { url: appLink } } ]] } })
         });
         const resData = await res.json();
-        if (resData.ok) {
-          resultMsg += `✅ Chat ${chatIdStr}: Success\n`;
-        } else {
-          resultMsg += `❌ Chat ${chatIdStr}: ${resData.description}\n`;
-        }
-      } catch (e) {
-        resultMsg += `❌ Chat ${chatIdStr}: ${e.message}\n`;
-      }
+        if (resData.ok) resultMsg += `✅ Chat ${chatIdStr}: Success\n`;
+        else resultMsg += `❌ Chat ${chatIdStr}: ${resData.description}\n`;
+      } catch (e) { resultMsg += `❌ Chat ${chatIdStr}: ${e.message}\n`; }
     }
     return sendMessage(env, chatId, resultMsg, { parse_mode: "Markdown" });
   }
@@ -116,7 +112,7 @@ async function handleMessage(msg, env) {
 
     if (userId === ADMIN_ID) {
       keyboard.inline_keyboard.push([{ text: "⚙️ Admin Panel", callback_data: 'admin_menu' }]);
-      keyboard.inline_keyboard.push([{ text: "📢 Test Post to Groups", callback_data: 'test_post' }]); // নতুন বাটন
+      keyboard.inline_keyboard.push([{ text: "📢 Test Post to Groups", callback_data: 'test_post' }]); 
     }
 
     return sendMessage(env, chatId, welcomeText, { parse_mode: "Markdown", reply_markup: keyboard });
@@ -133,7 +129,6 @@ async function handleCallback(cq, env) {
      return handleAdminCallback(cq, env);
   }
 
-  // 🟢 নতুন বাটনের অ্যাকশন
   if (data === 'test_post' && userId === ADMIN_ID) {
     await answerCallback(env, cq.id, "টেস্ট পোস্ট পাঠানো হচ্ছে...");
     
