@@ -1,5 +1,5 @@
 const ADMIN_ID = 7609414654;
-// আপনার গ্রুপ এবং চ্যানেলের সঠিক আইডি
+// ইসলামিক দুনিয়া (চ্যানেল) এবং লিংক শেয়ার গ্রুপ
 const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; 
 
 export default {
@@ -35,15 +35,18 @@ export default {
       for (const chatId of GROUPS_TO_POST) {
         let res;
         try {
+          // গ্রুপ এবং চ্যানেলে web_app বাটন কাজ করে না, তাই url ব্যবহার করতে হবে
+          const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
+          
           if (thumb) {
             res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`, {
               method: "POST", headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: chatId, photo: thumb, caption: caption, parse_mode: "HTML", reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn", web_app: { url: appLink } } ]] } })
+              body: JSON.stringify({ chat_id: chatId, photo: thumb, caption: caption, parse_mode: "HTML", reply_markup: keyboard })
             });
           } else {
             res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
               method: "POST", headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: chatId, text: caption, parse_mode: "HTML", reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn", web_app: { url: appLink } } ]] } })
+              body: JSON.stringify({ chat_id: chatId, text: caption, parse_mode: "HTML", reply_markup: keyboard })
             });
           }
           const resData = await res.json();
@@ -72,17 +75,20 @@ async function handleMessage(msg, env) {
   const userId = msg.from.id;
   const firstName = msg.from.first_name || "User";
 
-  // নতুন অ্যাডমিন কমান্ড: টেস্ট পোস্ট
+  // 🟢 অ্যাডমিন টেস্ট পোস্ট কমান্ড
   if (text.startsWith("/post") && userId === ADMIN_ID) {
     let appLink = env.MINI_APP_URL;
     const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
     let resultMsg = "📊 *Post Results:*\n\n";
+    
+    // গ্রুপ এবং চ্যানেলের জন্য URL বাটন
+    const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
 
     for (const chatIdStr of GROUPS_TO_POST) {
       try {
         const res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: chatIdStr, text: caption, parse_mode: "HTML", reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn", web_app: { url: appLink } } ]] } })
+          body: JSON.stringify({ chat_id: chatIdStr, text: caption, parse_mode: "HTML", reply_markup: keyboard })
         });
         const resData = await res.json();
         if (resData.ok) resultMsg += `✅ Chat ${chatIdStr}: Success\n`;
@@ -106,7 +112,7 @@ async function handleMessage(msg, env) {
       inline_keyboard: [
         [{ text: "🎬 ভিডিও দেখুন (Videos)", callback_data: 'menu_cats' }],
         [{ text: "👤 আমার প্রোফাইল", callback_data: 'menu_profile' }, { text: "👥 রেফারেল", callback_data: 'menu_ref' }],
-        [{ text: "🌐 মিনি অ্যাপে খেলুন", web_app: { url: appLink } }]
+        [{ text: "🌐 মিনি অ্যাপে খেলুন", web_app: { url: appLink } }] // এখানে web_app কাজ করবে (প্রাইভেট চ্যাট)
       ]
     };
 
@@ -135,12 +141,13 @@ async function handleCallback(cq, env) {
     let appLink = env.MINI_APP_URL;
     const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
     let resultMsg = "📊 *Test Post Results:*\n\n";
+    const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
 
     for (const chatIdStr of GROUPS_TO_POST) {
       try {
         const res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: chatIdStr, text: caption, parse_mode: "HTML", reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn", web_app: { url: appLink } } ]] } })
+          body: JSON.stringify({ chat_id: chatIdStr, text: caption, parse_mode: "HTML", reply_markup: keyboard })
         });
         const resData = await res.json();
         if (resData.ok) resultMsg += `✅ Chat ${chatIdStr}: Success\n`;
@@ -206,7 +213,7 @@ async function handleCallback(cq, env) {
         body: JSON.stringify({ 
             chat_id: chatId, video: video.video_url, 
             caption: `🎬 *${video.title}*`, parse_mode: "Markdown",
-            reply_markup: { inline_keyboard: [[ { text: "🎬 Watch in App (Earn Coins)", web_app: { url: appLink } } ]] }
+            reply_markup: { inline_keyboard: [[ { text: "🎬 Watch in App (Earn Coins)", web_app: { url: appLink } } ]] } // বটের চ্যাটে web_app কাজ করবে
         })
       });
     } else {
