@@ -105,10 +105,29 @@ async function init() {
   document.documentElement.setAttribute('data-theme', savedTheme);
   document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
   document.getElementById('themeToggle').onclick = toggleTheme;
+  
   try {
-    await authenticateUser(); await loadSettings(); await renderHome();
-    document.getElementById('loader').classList.add('hidden'); document.getElementById('main').classList.remove('hidden'); document.getElementById('bottomNav').classList.remove('hidden');
+    await authenticateUser(); 
+    await loadSettings(); 
+    await renderHome();
+    
+    document.getElementById('loader').classList.add('hidden'); 
+    document.getElementById('main').classList.remove('hidden'); 
+    document.getElementById('bottomNav').classList.remove('hidden');
     setupNav();
+
+    // ==========================================
+    // 🟢 নতুন লজিক: ডিপ লিংক চেক (বট থেকে সরাসরি ভিডিও ওপেন)
+    // ==========================================
+    const startParam = tg?.initDataUnsafe?.start_param || '';
+    if (startParam.startsWith('video_')) {
+        const videoId = startParam.replace('video_', '');
+        // হোমপেজ ব্যাকগ্রাউন্ডে লোড হওয়ার পর অটোমেটিক ভিডিও প্লেয়ার ওপেন হবে
+        setTimeout(() => {
+            openPlayer(videoId);
+        }, 300);
+    }
+    
   } catch (err) {
     document.getElementById('loader').innerHTML = `<div style="padding:20px;text-align:center;color:#ff6b6b;font-size:1.2rem;font-weight:bold;">❌ ${err.message}<br><br><button onclick="location.reload()" style="padding:12px 25px;border-radius:12px;border:none;background:#ff6b6b;color:#fff;font-weight:800;box-shadow:0 4px 15px rgba(255,0,0,0.4);">Retry</button></div>`;
   }
@@ -223,7 +242,6 @@ async function loadExploreVideos(catId) {
   if (!data || !data.length) { div.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted)">কোনো ভিডিও নেই</p>'; return; }
   div.innerHTML = data.map(v => videoCardHTML(v)).join(''); attachVideoCardEvents();
 }
-
 async function renderWallet() {
   const c = document.getElementById('pageContent'); const { data: txs } = await supabase.from('coin_transactions').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(30);
   c.innerHTML = `
@@ -234,7 +252,6 @@ async function renderWallet() {
       <p style="font-size:0.9rem; margin:6px 0; font-weight:600;">• কমপক্ষে <b>২০ জন রেফারেল</b> থাকতে হবে</p>
       <p style="font-size:0.9rem; margin:6px 0; font-weight:600;">• আমাদের <b>টেলিগ্রাম গ্রুপ ও চ্যানেলে</b> জয়েন থাকতে হবে</p>
       <div style="display:flex; gap:10px; margin-top:15px;">
-        <!-- এখানে ইসলামিক দুনিয়া এবং লিংক শেয়ার গ্রুপের লিংক দেওয়া হলো -->
         <button onclick="window.openTelegram('https://t.me/islamicdunia')" class="glass-btn" style="flex:1; background:linear-gradient(135deg,#0088cc,#00aaff); color:white; border:none; font-weight:800; font-size:0.8rem;">Join Channel</button>
         <button onclick="window.openTelegram('https://t.me/linksharegroupbd98632')" class="glass-btn" style="flex:1; background:linear-gradient(135deg,#0088cc,#00aaff); color:white; border:none; font-weight:800; font-size:0.8rem;">Join Group</button>
       </div>
@@ -273,21 +290,17 @@ async function renderWallet() {
     } catch (e) { statusEl.textContent = ''; alert('ভেরিফিকেশন ফেইল হয়েছে। আবার চেষ্টা করুন।'); }
   };
 }
-
 async function renderReferral() {
   const c = document.getElementById('pageContent'); const link = `https://t.me/${cfg.BOT_USERNAME}?startapp=ref_${currentUser.referral_code}`;
   c.innerHTML = `<div class="glass-card" style="padding:25px 20px;text-align:center"><h3 class="text-3d">👥 Refer & Earn</h3><p style="margin:15px 0;color:var(--text-muted);font-size:0.95rem; font-weight:600;">বন্ধুকে আমন্ত্রণ জানান, প্রতি সফল রেফারেলে <b style="color:var(--gold)">${currentSettings.referral_coins} কয়েন</b> পান!</p><div class="glass-input" style="word-break:break-all;font-size:0.8rem;text-align:left; background:rgba(0,0,0,0.3);">${link}</div><button class="glass-btn primary" id="copyRefBtn" style="margin-top:15px">📋 Copy Link</button></div>`;
   document.getElementById('copyRefBtn').onclick = () => { navigator.clipboard.writeText(link); alert('লিংক কপি হয়েছে!'); };
 }
-
 async function renderProfile() {
   const c = document.getElementById('pageContent'); const { data: board } = await supabase.rpc('get_leaderboard', { p_period: 'all', p_limit: 10 }); const { data: videos } = await supabase.from('videos').select('id').eq('status', 'approved');
   c.innerHTML = `
     <div class="glass-card" style="padding:25px;text-align:center; margin-bottom:20px;"><img src="${currentUser.photo_url || 'https://via.placeholder.com/80'}" style="width:90px;height:90px;border-radius:50%;border:3px solid var(--neon-1); box-shadow:0 0 25px var(--neon-1); object-fit:cover;"><h3 class="text-3d" style="margin-top:15px">${esc(currentUser.first_name || 'User')}</h3><p style="color:var(--text-muted); font-weight:600; font-size:1rem; margin-top:5px;">@${esc(currentUser.username || 'unknown')}</p>${currentUser.is_admin ? '<p style="color:var(--neon-2);font-weight:900; margin-top:10px; text-shadow:0 0 10px var(--neon-2); font-size:1.1rem;">👑 ADMIN</p>' : ''}</div>
     <div class="stat-grid"><div class="stat-card"><h4>মোট কয়েন</h4><p>${currentUser.balance}</p></div><div class="stat-card"><h4>আজকের আয়</h4><p>${currentUser.today_earned}</p></div><div class="stat-card"><h4>রেফারেল</h4><p>${currentUser.total_referrals}</p></div><div class="stat-card"><h4>মোট ভিডিও</h4><p>${videos?.length || 0}</p></div></div>
     <h3 class="section-title">🏆 Leaderboard (Top 10)</h3><div class="glass-card" style="padding:10px">${(board || []).map(b => `<div style="padding:12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--glass-border)"><span style="font-weight:900; width:35px; font-size:1.1rem; color:${b.rank <= 3 ? 'var(--gold)' : 'var(--text-muted)'}; text-shadow:${b.rank <= 3 ? '0 0 10px var(--gold)' : 'none'}">#${b.rank}</span><img src="${b.photo_url || 'https://via.placeholder.com/32'}" style="width:40px;height:40px;border-radius:50%; object-fit:cover; border:1px solid var(--glass-border);"><div style="flex:1;font-size:0.95rem;font-weight:700;">${esc(b.first_name || 'User')}</div><div style="color:var(--gold);font-weight:900; font-size:1.1rem; text-shadow:0 2px 5px rgba(0,0,0,0.5);">🪙 ${b.score}</div></div>`).join('')}</div>
-    
-    <!-- অ্যাডমিন বাটনের ফিক্স (এখন এটি <a> ট্যাগ, তাই পেজ রিফ্রেশ হবে না) -->
     ${currentUser.is_admin ? `<h3 class="section-title">⚙️ Admin</h3><div class="glass-card" style="padding:20px"><a href="./admin.html" class="glass-btn primary" style="display:block; text-align:center; text-decoration:none;">Open Admin Panel</a></div>` : ''}`;
 }
 function showCoinPopup(amountText, messageText = 'কয়েন অর্জিত!') { const p = document.getElementById('coinPopup'); document.getElementById('coinPopupAmount').textContent = amountText; document.getElementById('coinPopupText').textContent = messageText; p.classList.remove('hidden'); setTimeout(() => p.classList.add('hidden'), 2500); if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); }
