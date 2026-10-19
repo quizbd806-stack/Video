@@ -15,6 +15,7 @@ export default {
 
     const url = new URL(request.url);
     
+    // ১. গ্রুপ ও চ্যানেল মেম্বারশিপ চেক API
     if (url.pathname === '/verify-groups' && request.method === 'POST') {
       const { userId } = await request.json();
       let allJoined = true; let errorDetails = [];
@@ -28,6 +29,7 @@ export default {
       return new Response(JSON.stringify({ joined: allJoined, errors: errorDetails }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // ২. অটো-পোস্ট API
     if (url.pathname === '/auto-post' && request.method === 'POST') {
       try {
         const { videoId, title, thumbnail_url, youtube_id } = await request.json();
@@ -45,6 +47,7 @@ export default {
         for (const chatId of GROUPS_TO_POST) {
           let res;
           try {
+            // গ্রুপ ও চ্যানেলে web_app বাটন কাজ করে না, তাই url বাটন ব্যবহার করা হলো
             const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
             if (thumb) {
               res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`, {
@@ -67,6 +70,7 @@ export default {
       }
     }
 
+    // ৩. বটের মেসেজ হ্যান্ডলার
     if (request.method === "POST") {
       try {
         const update = await request.json();
@@ -94,7 +98,7 @@ async function handleMessage(msg, env) {
       inline_keyboard: [
         [{ text: "🎬 ভিডিও দেখুন (Videos)", callback_data: 'menu_cats' }],
         [{ text: "👤 আমার প্রোফাইল", callback_data: 'menu_profile' }, { text: "👥 রেফারেল", callback_data: 'menu_ref' }],
-        [{ text: "🌐 মিনি অ্যাপে খেলুন", url: appLink }]
+        [{ text: "🌐 মিনি অ্যাপে খেলুন", url: appLink }] // গ্রুপে url বাটন
       ]
     };
     return sendMessage(env, chatId, welcomeText, { parse_mode: "Markdown", reply_markup: keyboard });
@@ -134,18 +138,6 @@ async function handleCallback(cq, env) {
   if (data.startsWith('approve_') || data.startsWith('reject_') || data.startsWith('wd_')) {
      return handleAdminCallback(cq, env);
   }
-
-  // 🟢 গ্রুপে ক্লিক করলে নতুন মেসেজ পাঠানোর লজিক
-  const reply = (text, opts) => {
-      if (isGroup) {
-          // গ্রুপে রিপ্লাই হিসেবে মেসেজ পাঠাবে
-          const newOpts = { ...opts, reply_to_message_id: messageId };
-          return sendMessage(env, chatId, text, newOpts);
-      } else {
-          // প্রাইভেট চ্যাটে মেসেজ এডিট করবে
-          return editMessage(env, chatId, messageId, text, opts);
-      }
-  };
 
   if (data === 'test_post' && userId === ADMIN_ID) {
     await answerCallback(env, cq.id, "টেস্ট পোস্ট পাঠানো হচ্ছে...");
@@ -199,7 +191,9 @@ async function handleCallback(cq, env) {
         keyboard.inline_keyboard.push([{ text: "⚙️ Admin Panel", callback_data: 'admin_menu' }]);
         keyboard.inline_keyboard.push([{ text: "📢 Test Post to Groups", callback_data: 'test_post' }]);
     }
-    return reply(`🎬 *TurkFlix BD*\n\nস্বাগতম!\n\nনিচের মেনু থেকে অপশন বেছে নিন 👇`, { parse_mode: "Markdown", reply_markup: keyboard });
+    const opts = { parse_mode: "Markdown", reply_markup: keyboard, reply_to_message_id: isGroup ? messageId : undefined };
+    if (isGroup) return sendMessage(env, chatId, `🎬 *TurkFlix BD*\n\nস্বাগতম!\n\nনিচের মেনু থেকে অপশন বেছে নিন 👇`, opts);
+    return editMessage(env, chatId, messageId, `🎬 *TurkFlix BD*\n\nস্বাগতম!\n\nনিচের মেনু থেকে অপশন বেছে নিন 👇`, opts);
   }
 
   if (data.startsWith('cat_')) {
@@ -208,6 +202,7 @@ async function handleCallback(cq, env) {
     return showVideosByCategory(env, chatId, catId, messageId, isGroup);
   }
 
+  // 🔴 ভিডিও ওপেন করার লজিক ফিক্স
   if (data.startsWith('vid_')) {
     const vidId = data.split('_')[1];
     await answerCallback(env, cq.id, "ভিডিও ওপেন হচ্ছে...");
@@ -220,6 +215,7 @@ async function handleCallback(cq, env) {
     if (!appLink.includes('?')) appLink += `?startapp=video_${video.id}`;
     else appLink += `&startapp=video_${video.id}`;
     
+    // গ্রুপ/চ্যানেলে বাটনটি url হিসেবে পাঠানো হচ্ছে
     if (video.source_type === 'upload' && video.video_url) {
       return fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendVideo`, {
         method: "POST", headers: { "Content-Type": "application/json" },
