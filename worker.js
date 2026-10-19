@@ -1,7 +1,8 @@
 const ADMIN_ID = 7609414654;
+// ইসলামিক দুনিয়া (চ্যানেল) এবং লিংক শেয়ার গ্রুপ
 const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; 
 
-// CORS হেডার (এরর সমাধানের জন্য জরুরি)
+// CORS হেডার (Failed to fetch এরর সমাধানের জন্য)
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -10,7 +11,6 @@ const corsHeaders = {
 
 export default {
   async fetch(request, env) {
-    // ব্রাউজারের OPTIONS চেক রিকোয়েস্ট হ্যান্ডেল করা
     if (request.method === 'OPTIONS') {
       return new Response('ok', { headers: corsHeaders });
     }
@@ -40,13 +40,20 @@ export default {
         if (!appLink.includes('?')) appLink += `?startapp=video_${videoId}`;
         else appLink += `&startapp=video_${videoId}`;
 
+        // বট লিংক যুক্ত করা হলো
+        const botLink = `https://t.me/TurkFlixbd_Bot`; 
+
         const thumb = thumbnail_url || (youtube_id ? `https://img.youtube.com/vi/${youtube_id}/hqdefault.jpg` : null);
-        const caption = `🎬 <b>${title}</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
+        
+        // ক্যাপশনে বট লিংক দেওয়া হলো
+        const caption = `🎬 <b>${title}</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n🤖 <b>বট লিংক:</b> ${botLink}\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
+        
         let postResults = [];
 
         for (const chatId of GROUPS_TO_POST) {
           let res;
           try {
+            // গ্রুপ ও চ্যানেলে কাজ করার জন্য url বাটন
             const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
             if (thumb) {
               res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`, {
@@ -90,7 +97,8 @@ async function handleMessage(msg, env) {
 
   if (text.startsWith("/post") && userId === ADMIN_ID) {
     let appLink = env.MINI_APP_URL;
-    const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
+    const botLink = `https://t.me/TurkFlixbd_Bot`;
+    const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n🤖 <b>বট লিংক:</b> ${botLink}\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
     let resultMsg = "📊 *Post Results:*\n\n";
     const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
 
@@ -149,7 +157,8 @@ async function handleCallback(cq, env) {
     await answerCallback(env, cq.id, "টেস্ট পোস্ট পাঠানো হচ্ছে...");
     
     let appLink = env.MINI_APP_URL;
-    const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
+    const botLink = `https://t.me/TurkFlixbd_Bot`;
+    const caption = `🎬 <b>টেস্ট মেসেজ!</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n🤖 <b>বট লিংক:</b> ${botLink}\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
     let resultMsg = "📊 *Test Post Results:*\n\n";
     const keyboard = { inline_keyboard: [[ { text: "🎬 Watch & Earn", url: appLink } ]] };
 
@@ -282,7 +291,7 @@ async function showReferral(env, chatId, userId, editMsgId = null) {
   if (!user || !user.referral_code) return sendMessage(env, chatId, "❌ ইউজার পাওয়া যায়নি।");
   const link = `https://t.me/${env.BOT_USERNAME || 'TurkFlixbd_Bot'}?startapp=ref_${user.referral_code}`;
   const text = `👥 *রেফারেল সিস্টেম*\n\nবন্ধুকে আমন্ত্রণ জানান, প্রতি সফল রেফারেলে কয়েন পান!\n\n🔗 *আপনার রেফারেল লিংক:*\n\`${link}\`\n\n_(লিংকে ক্লিক করে কপি করুন)_`;
-  const keyboard = { inline_keyboard: [[{ text: "📤 টেলিগ্রামে শেয়ার করুন", url: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("🎬 ভিডিও দেখুন, কয়েন আয় করুন!")}` }], [{ text: "🔙 মেইন মেনু", callback_data: 'menu_back' }]] };
+  const keyboard = { inline_keyboard: [[{ text: "📤 টেলিগ্রামে শেয়ার করুন", url: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("🎬 ভিডিও দেখুন, কয়েন আয় করুন!")}` }], [{ text: "🔙 মেইন মেনু", callback_data: 'menu_back' }]] };
   if (editMsgId) return editMessage(env, chatId, editMsgId, text, { parse_mode: "Markdown", reply_markup: keyboard });
   return sendMessage(env, chatId, text, { parse_mode: "Markdown", reply_markup: keyboard });
 }
