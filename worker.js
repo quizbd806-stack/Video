@@ -5,7 +5,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     
-    // ১. গ্রুপ ও চ্যানেল মেম্বারশিপ চেক API
     if (url.pathname === '/verify-groups' && request.method === 'POST') {
       const { userId } = await request.json();
       let allJoined = true;
@@ -25,7 +24,6 @@ export default {
       });
     }
 
-    // ২. অটো-পোস্ট API
     if (url.pathname === '/auto-post' && request.method === 'POST') {
       const { videoId, title, thumbnail_url, youtube_id } = await request.json();
       const appLink = `${env.MINI_APP_URL}?startapp=video_${videoId}`;
@@ -65,7 +63,6 @@ export default {
       });
     }
 
-    // ৩. বটের সাধারণ মেসেজ হ্যান্ডলার
     if (request.method === "POST") {
       try {
         const update = await request.json();
@@ -134,24 +131,24 @@ async function handleCallback(cq, env) {
 
   if (action === "approve") {
     await updateSupabase(env, `videos?id=eq.${id}`, "PATCH", { status: "approved", published_at: new Date().toISOString() });
-    await answerCallback(env, cq.id, "✅ ভিডিও অ্যাপ্রুভ করা হয়েছে।");
+    await answerCallback(env, cq.id, "✅ ভিডিও অ্যাপ্রুভ করা হয়েছে।");
   } 
   else if (action === "reject") {
     await updateSupabase(env, `videos?id=eq.${id}`, "PATCH", { status: "rejected" });
-    await answerCallback(env, cq.id, "❌ ভিডিও রিজেক্ট করা হয়েছে।");
+    await answerCallback(env, cq.id, "❌ ভিডিও রিজেক্ট করা হয়েছে।");
   }
   else if (action === "wd") {
     const subAction = cq.data.split("_")[1]; const wdId = cq.data.split("_")[2];
     if (subAction === "complete") {
       await updateSupabase(env, `withdrawals?id=eq.${wdId}`, "PATCH", { status: "completed", processed_at: new Date().toISOString() });
-      await answerCallback(env, cq.id, "✅ উইথড্রয়াল সম্পন্ন হয়েছে।");
+      await answerCallback(env, cq.id, "✅ উইথড্রয়াল সম্পন্ন হয়েছে।");
     } else if (subAction === "reject") {
       await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/admin_adjust_coins`, {
         method: "POST", headers: { "apikey": env.SUPABASE_SERVICE_KEY, "Authorization": `Bearer ${env.SUPABASE_SERVICE_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({ p_admin_tg: ADMIN_ID, p_target_tg: cq.message.text.match(/\((\d+)\)/)[1], p_amount: parseInt(cq.message.text.match(/Amount: (\d+)/)[1]), p_reason: "Withdrawal rejected - refund" })
       });
       await updateSupabase(env, `withdrawals?id=eq.${wdId}`, "PATCH", { status: "rejected", processed_at: new Date().toISOString() });
-      await answerCallback(env, cq.id, "❌ উইথড্রয়াল রিজেক্ট ও রিফান্ড করা হয়েছে।");
+      await answerCallback(env, cq.id, "❌ উইথড্রয়াল রিজেক্ট ও রিফান্ড করা হয়েছে।");
     }
   }
   return new Response("OK");
