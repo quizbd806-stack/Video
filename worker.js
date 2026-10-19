@@ -1,58 +1,71 @@
 const ADMIN_ID = 7609414654;
-const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; // আপনার গ্রুপ ও চ্যানেলের আইডি এখানে দিন
+const GROUPS_TO_POST = ['-1003978284561', '-1003624299160']; // আপনার গ্রুপ ও চ্যানেলের আইডি
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     
-    // ১. গ্রুপ মেম্বারশিপ চেক API (উইথড্র এর জন্য)
+    // ১. গ্রুপ ও চ্যানেল মেম্বারশিপ চেক API
     if (url.pathname === '/verify-groups' && request.method === 'POST') {
       const { userId } = await request.json();
-      const groups = ['-1003978284561', '-1003624299160']; 
       let allJoined = true;
+      let errorDetails = [];
 
-      for (const chatId of groups) {
+      for (const chatId of GROUPS_TO_POST) {
         const res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/getChatMember?chat_id=${chatId}&user_id=${userId}`);
         const data = await res.json();
+        
         if (!data.ok || !['creator', 'administrator', 'member'].includes(data.result.status)) {
           allJoined = false;
-          break;
+          errorDetails.push(`Chat ${chatId}: ${data.description || 'Not joined'}`);
         }
       }
-      return new Response(JSON.stringify({ joined: allJoined }), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+      return new Response(JSON.stringify({ joined: allJoined, errors: errorDetails }), { 
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } 
+      });
     }
 
-    // ২. অটো-পোস্ট API (ভিডিও আপলোড হলে গ্রুপে পাঠানোর জন্য)
+    // ২. অটো-পোস্ট API
     if (url.pathname === '/auto-post' && request.method === 'POST') {
       const { videoId, title, thumbnail_url, youtube_id } = await request.json();
       const appLink = `${env.MINI_APP_URL}?startapp=video_${videoId}`;
       const thumb = thumbnail_url || (youtube_id ? `https://img.youtube.com/vi/${youtube_id}/hqdefault.jpg` : null);
       
       const caption = `🎬 <b>${title}</b>\n\n💰 ভিডিও দেখুন, কয়েন আয় করুন!\n👇 নিচের বাটনে ক্লিক করে অ্যাপে ঢুকুন`;
+      let postResults = [];
 
       for (const chatId of GROUPS_TO_POST) {
-        if (thumb) {
-          await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: chatId, photo: thumb, caption: caption, parse_mode: "HTML",
-              reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn Coins", web_app: { url: appLink } } ]] }
-            })
-          });
-        } else {
-          await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: chatId, text: caption, parse_mode: "HTML",
-              reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn Coins", web_app: { url: appLink } } ]] }
-            })
-          });
+        let res;
+        try {
+          if (thumb) {
+            res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: chatId, photo: thumb, caption: caption, parse_mode: "HTML",
+                reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn Coins", web_app: { url: appLink } } ]] }
+              })
+            });
+          } else {
+            res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: chatId, text: caption, parse_mode: "HTML",
+                reply_markup: { inline_keyboard: [[ { text: "🎬 Watch & Earn Coins", web_app: { url: appLink } } ]] }
+              })
+            });
+          }
+          const resData = await res.json();
+          postResults.push({ chatId, success: resData.ok, error: resData.description });
+        } catch (e) {
+          postResults.push({ chatId, success: false, error: e.message });
         }
       }
-      return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+      return new Response(JSON.stringify({ status: "done", results: postResults }), { 
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } 
+      });
     }
 
-    // ৩. বটের সাধারণ মেসেজ হ্যান্ডলার (Webhook)
+    // ৩. বটের সাধারণ মেসেজ হ্যান্ডলার
     if (request.method === "POST") {
       try {
         const update = await request.json();
